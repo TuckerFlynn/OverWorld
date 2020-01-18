@@ -15,7 +15,7 @@ namespace UnityEngine.Tilemaps
         public Sprite DefaultSprite;
         public GameObject DefaultGameObject;
         public float moveCost = 1.0f;
-        public Tile.ColliderType DefaultColliderType = Tile.ColliderType.Grid;
+        public Tile.ColliderType DefaultColliderType = Tile.ColliderType.None;
 
         public override void GetTileData(Vector3Int position, ITilemap tilemap, ref TileData tileData)
         {

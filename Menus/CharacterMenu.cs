@@ -78,6 +78,7 @@ public class CharacterMenu : MonoBehaviour
         h = Random.Range(0, hairSprites.Length);
         hair.sprite = hairSprites[h];
     }
+
     public void Back()
     {
         SceneManager.LoadSceneAsync("MainMenu");

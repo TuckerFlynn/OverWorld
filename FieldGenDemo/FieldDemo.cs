@@ -39,7 +39,7 @@ public class FieldDemo : MonoBehaviour
         tempSlider.value = PlayerPrefs.GetFloat("demoTemp", 0.5f);
 
         DefineBiomes();
-        fieldGenerator.LoadTiles();
+        TilesetLoader.LoadTiles();
     }
 
     private void Start()

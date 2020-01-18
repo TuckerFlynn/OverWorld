@@ -13,6 +13,7 @@ namespace UnityEngine.Tilemaps
     {
         [SerializeField]
         public Sprite DefaultSprite;
+        public string group;
         public GameObject DefaultGameObject;
         public Tile.ColliderType DefaultColliderType = Tile.ColliderType.None;
 
@@ -35,6 +36,7 @@ namespace UnityEngine.Tilemaps
         {
             EditorGUI.BeginChangeCheck();
             tile.DefaultSprite = (Sprite)EditorGUILayout.ObjectField("Sprite", tile.DefaultSprite, typeof(Sprite), false, null);
+            tile.group = EditorGUILayout.TextField("Group", "");
             tile.DefaultGameObject = (GameObject)EditorGUILayout.ObjectField("GameObject", tile.DefaultGameObject, typeof(GameObject), false, null);
             tile.DefaultColliderType = (Tile.ColliderType)EditorGUILayout.EnumPopup("Default Collider", tile.DefaultColliderType);
 

@@ -10,8 +10,8 @@ namespace UnityEngine.Tilemaps
     /// Terrain Tiles, similar to Pipeline Tiles, are tiles which take into consideration its orthogonal and diagonal neighboring tiles and displays a sprite depending on whether the neighboring tile is the same tile.
     /// </summary>
     [Serializable]
-    [CreateAssetMenu(fileName = "New Adv Environment Tile", menuName = "Tiles/EnvrAdv Tile")]
-    public class EnvrAdvTile : TileBase
+    [CreateAssetMenu(fileName = "New Adv Environment Tile", menuName = "Tiles/Envr Adv Tile")]
+    public class EnvrAdvTile : EnvrTile
     {
         /// <summary>
         /// The Sprites used for defining the Terrain.
@@ -20,9 +20,6 @@ namespace UnityEngine.Tilemaps
         public Sprite[] m_Sprites;
         // Allows two different terrain tiles to consider each other as themselves
         public TileBase sister;
-        public float moveCost;
-        public GameObject DefaultGameObject;
-        public Tile.ColliderType DefaultColliderType = Tile.ColliderType.Grid;
 
         /// <summary>
         /// This method is called when the tile is refreshed.

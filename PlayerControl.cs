@@ -29,23 +29,23 @@ public class PlayerControl : MonoBehaviour
                 // Check if the player is near an edge, and is trying to move out of the field
                 if (transform.position.x < 1.0f && horiIn < 0.0f)
                 {
-                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.left);
                     transform.position = new Vector3(63.5f, transform.position.y);
+                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.left);
                 }
                 else if (transform.position.x > 63.0f && horiIn > 0.0f)
                 {
-                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.right);
                     transform.position = new Vector3(0.5f, transform.position.y);
+                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.right);
                 }
                 else if (transform.position.y < 0.5f && vertIn < 0.0f)
                 {
-                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.down);
                     transform.position = new Vector3(transform.position.x, 63.0f);
+                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.down);
                 }
                 else if (transform.position.y > 62.5f && vertIn > 0.0f)
                 {
-                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.up);
                     transform.position = new Vector3(transform.position.x, 0.0f);
+                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.up);
                 }
                 inputUse = true;
             }

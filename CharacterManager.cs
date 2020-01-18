@@ -39,7 +39,7 @@ public class CharacterManager : MonoBehaviour
 
     private void OnDisable()
     {
-        
+        SaveCharacter();
     }
 
     public void LoadCharacter()
@@ -67,5 +67,32 @@ public class CharacterManager : MonoBehaviour
             rends[6].sprite = offHand;
         }
         charObject.transform.position = new Vector3(activeChar.fieldPos.x, activeChar.fieldPos.y, 0.0f);
+    }
+
+    public void SaveCharacter()
+    {
+        // Update the active character ...
+        activeChar.fieldPos = new Vector2(charObject.transform.position.x, charObject.transform.position.y);
+
+        // ... And save the changes to the character config file
+        Character[] characters;
+        if (File.Exists(Application.persistentDataPath + "/characters.config"))
+        {
+            // Read the file and convert it to an array of Character objects
+            string jsonIn = File.ReadAllText(Application.persistentDataPath + "/characters.config");
+            characters = JsonHelper.FromJson<Character>(jsonIn);
+            // Check if a character with the same name already exists, and if it does- overwrite it
+            for (int i = 0; i < characters.Length; i++)
+            {
+                if (characters[i].name == activeChar.name)
+                {
+                    characters[i] = activeChar;
+                    string jsonOut1 = JsonHelper.ToJson(characters, true);
+                    File.WriteAllText(Application.persistentDataPath + "/characters.config", jsonOut1);
+                    Debug.Log("Character " + activeChar.name + " has been saved.");
+                    return;
+                }
+            }
+        }
     }
 }
