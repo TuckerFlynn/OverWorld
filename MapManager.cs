@@ -14,9 +14,10 @@ public class MapManager : MonoBehaviour
     public Tilemap Ground;
     public Tilemap Objects;
 
-    private MapField[] masterMap;
+    public MapField[] masterMap;
     public Vector2Int worldPos;
     public FieldGenerator fieldGenerator;
+    public IngameMenu ingameMenu;
 
     CharacterManager charMngr;
     
@@ -29,7 +30,7 @@ public class MapManager : MonoBehaviour
         }
         else if (mapManager != this)
         {
-            Destroy(this);
+            Destroy(this.gameObject);
         }
     }
 
@@ -52,6 +53,7 @@ public class MapManager : MonoBehaviour
         {
             Directory.CreateDirectory(Application.persistentDataPath + "/Fields");
         }
+        ingameMenu = GameObject.Find("MenuScript").GetComponent<IngameMenu>();
         LoadField(worldPos);
     }
     // Load a field from file or generate a new one
@@ -70,6 +72,7 @@ public class MapManager : MonoBehaviour
         if (File.Exists(Application.persistentDataPath + "/Fields/" + file))
         {
             LoadFieldFile(worldPos);
+            Debug.Log("Succesfully loaded field " + worldPos + " with biome: " + masterMap[CoordToId(worldPos, worldSize)].MainBiome);
         }
         // Otherwise generate the map and save it
         else
@@ -79,6 +82,9 @@ public class MapManager : MonoBehaviour
 
             Debug.Log("Succesfully generated field " + worldPos + " with biome: " + masterMap[CoordToId(worldPos, worldSize)].MainBiome);
         }
+
+        // Update minimap display
+        ingameMenu.UpdateMinimap(worldPos);
     }
     // Save a field to file, formatted so that it can be opened by Tiled
     public void SaveFieldFile(Vector2Int pos)
@@ -200,7 +206,6 @@ public class MapManager : MonoBehaviour
 
         Ground.SetTiles(positions, groundArray);
         Objects.SetTiles(positions, objectsArray);
-        Debug.Log("Field loaded from file");
     }
 
     // Load the world map from file

@@ -94,8 +94,8 @@ public class WorldGenerator : MonoBehaviour {
         }
         precipOrg = hash.Range(0, 1000, 0);
         tempOrg = hash.Range(1000, 2000, 1);
-        precipScale *= 0.5f + biomeScaleSlider.value;
-        tempScale *= 0.5f + biomeScaleSlider.value;
+        precipScale = 10.0f * (0.5f + biomeScaleSlider.value);
+        tempScale = 20.0f * (0.5f + biomeScaleSlider.value);
 
         worldSize = Mathf.RoundToInt(worldSizeSlider.value);
 
