@@ -68,7 +68,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             int q = invenMgr.GetInvenByString<InvenItem[]>(source)[index].Quantity;
             if (Input.GetKey(KeyCode.LeftShift)) q = Mathf.FloorToInt(q / 2);
 
-            Debug.Log("Dropped " + q + " of " + invenMgr.GetInvenByString<InvenItem[]>(source)[index].Item + " outside inventory!");
+            Debug.Log("Dropped " + q + " of " + invenMgr.GetInvenByString<InvenItem[]>(source)[index].Item + " on the ground!");
             invenMgr.DropItem(index, source, q);
         }
     }

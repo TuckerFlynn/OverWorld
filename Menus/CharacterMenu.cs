@@ -32,12 +32,12 @@ public class CharacterMenu : MonoBehaviour
     {
         bodySprites = Resources.LoadAll<Sprite>("Sprites/Character/body");
         hairSprites = Resources.LoadAll<Sprite>("Sprites/Character/hair");
-
-        itemDB = ItemsDatabase.itemsDatabase;
     }
 
     void Start()
     {
+        itemDB = ItemsDatabase.itemsDatabase;
+
         for (int i = 0; i < itemDB.ItemDatabase.Count; i++)
         {
             // Find starter chest items by their generic titles, this excludes any armours

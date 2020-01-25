@@ -21,24 +21,24 @@ public class ItemsDatabase : MonoBehaviour
         {
             DontDestroyOnLoad(gameObject);
             itemsDatabase = this;
+            
+            string JsonIn = Resources.Load<TextAsset>("Json/items").text;
+            Item[] items = JsonConvert.DeserializeObject<Item[]>(JsonIn);
+            for (int i = 0; i < items.Length; i++)
+            {
+                ItemDatabase.Add(items[i]);
+            }
+            for (int i = 0; i < ItemDatabase.Count; i++)
+            {
+                Sprite[] sheet = Resources.LoadAll<Sprite>("Sprites/Items/" + ItemDatabase[i].SpriteName);
+                ItemDatabase[i].Sprite = sheet[ItemDatabase[i].SpriteID];
+            }
+            Debug.Log("ItemDatabase built with " + ItemDatabase.Count + " items.");
         }
         else if (itemsDatabase != this)
         {
             Destroy(this.gameObject);
         }
-
-        string JsonIn = Resources.Load<TextAsset>("Json/items").text;
-        Item[] items = JsonConvert.DeserializeObject<Item[]>(JsonIn);
-        for (int i = 0; i < items.Length; i++)
-        {
-            ItemDatabase.Add(items[i]);
-        }
-        for (int i = 0; i < ItemDatabase.Count; i++)
-        {
-            Sprite[] sheet = Resources.LoadAll<Sprite>("Sprites/Items/" + ItemDatabase[i].SpriteName);
-            ItemDatabase[i].Sprite = sheet[ItemDatabase[i].SpriteID];
-        }
-        Debug.Log("ItemDatabase built with " + ItemDatabase.Count + " items.");
     }
     // Get item matches the ID value, while the item index within the array SHOULD be the same, it is not garaunteed
     public Item GetItem(int id)

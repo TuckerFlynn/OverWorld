@@ -22,7 +22,6 @@ public class LoadMenu : MonoBehaviour
     {
         bodySprites = Resources.LoadAll<Sprite>("Sprites/Character/body");
         hairSprites = Resources.LoadAll<Sprite>("Sprites/Character/hair");
-
     }
 
     void Start()
@@ -107,15 +106,22 @@ public class LoadMenu : MonoBehaviour
 
     public void PlayPlay()
     {
-        for (int i = 0; i < buttons.Length; i++)
+        if (File.Exists(Application.persistentDataPath + "/worldMap.dat"))
         {
-            if (buttons[i].GetComponent<Toggle>().isOn)
+            for (int i = 0; i < buttons.Length; i++)
             {
-                CharacterManager charMngr = CharacterManager.characterManager;
-                charMngr.activeChar = characters[i];
-                break;
+                if (buttons[i].GetComponent<Toggle>().isOn)
+                {
+                    CharacterManager charMngr = CharacterManager.characterManager;
+                    charMngr.activeChar = characters[i];
+                    break;
+                }
             }
+            SceneManager.LoadScene("MapManager");
         }
-        SceneManager.LoadScene("MapManager");
+        else
+        {
+            SceneManager.LoadScene("WorldGenMenu");
+        }
     }
 }

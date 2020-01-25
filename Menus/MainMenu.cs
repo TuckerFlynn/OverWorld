@@ -6,6 +6,12 @@ using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
+    public GameObject settings;
+
+    private void Start()
+    {
+        settings.SetActive(false);
+    }
     public void LoadWorldGenMenu()
     {
         SceneManager.LoadSceneAsync("WorldGenMenu");
@@ -21,19 +27,9 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadSceneAsync("CharacterMenu");
     }
 
-    bool nope = false;
-    public void Settings(GameObject go)
+    public void Settings()
     {
-        if (!nope)
-        {
-            go.transform.GetComponent<Text>().text = "lol nope :D";
-            nope = true;
-        }
-        else
-        {
-            go.transform.GetComponent<Text>().text = "settings";
-            nope = false;
-        }
+        settings.SetActive(true);
     }
 
     public void QuitGame()

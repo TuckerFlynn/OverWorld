@@ -232,11 +232,31 @@ public class InventoryManager : MonoBehaviour
                 // Move from inventory space into occupied inventory space
                 else
                 {
-                    InvenItem sourceItem = Inventory[sourceIndex];
-                    InvenItem destItem = Inventory[destIndex];
-                    Inventory[sourceIndex] = destItem;
-                    Inventory[destIndex] = sourceItem;
-                    success = true;
+                    // Check if items can be stacked
+                    if (Inventory[sourceIndex].Item.ID == Inventory[destIndex].Item.ID)
+                    {
+                        Inventory[destIndex].Quantity += Inventory[sourceIndex].Quantity;
+                        // If the total of the two stacks is more than a full stack, move as many as possible to the destination
+                        if (Inventory[destIndex].Quantity > Inventory[destIndex].Item.Stack)
+                        {
+                            int diff = Inventory[destIndex].Quantity - Inventory[destIndex].Item.Stack;
+                            Inventory[destIndex].Quantity = Inventory[destIndex].Item.Stack;
+                            Inventory[sourceIndex].Quantity = diff;
+                        }
+                        // Otherwise fill the destination stack and empty the source
+                        else
+                        {
+                            Inventory[sourceIndex] = new InvenItem();
+                        }
+                    }
+                    else
+                    {
+                        InvenItem sourceItem = Inventory[sourceIndex];
+                        InvenItem destItem = Inventory[destIndex];
+                        Inventory[sourceIndex] = destItem;
+                        Inventory[destIndex] = sourceItem;
+                        success = true;
+                    }
                 }
             }
             // Moving to equipment
@@ -327,12 +347,6 @@ public class InventoryManager : MonoBehaviour
                 }
             }
         }
-        else if (destStr == "Ground")
-        {
-            // For now, can only drop full stacks!
-            DropItem(sourceIndex, sourceStr, GetInvenByString<InvenItem[]>(sourceStr)[sourceIndex].Quantity);
-            success = true;
-        }
         RefreshInvenUI();
         UpdateCharPreview();
         return success;
@@ -349,7 +363,6 @@ public class InventoryManager : MonoBehaviour
             {
                 Inventory[i].Quantity++;
                 success = true;
-                Debug.Log("Added " + Inventory[i].Item + " to previous inventory stack");
                 break;
             }
         }
@@ -366,7 +379,6 @@ public class InventoryManager : MonoBehaviour
                         Quantity = 1
                     };
                     success = true;
-                    Debug.Log("Added " + Inventory[i].Item + " to new inventory stack");
                     break;
                 }
             }
