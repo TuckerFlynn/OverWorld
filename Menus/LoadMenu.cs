@@ -4,31 +4,30 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-
+using Newtonsoft.Json;
 
 public class LoadMenu : MonoBehaviour
 {
+    ItemsDatabase itemDB;
+
     public GameObject buttonToggle;
     public GameObject viewportContent;
     public Character[] characters;
     public GameObject[] buttons;
 
     private Sprite[] bodySprites;
-    private Sprite[] chestSprites;
-    private Sprite[] legSprites;
     private Sprite[] hairSprites;
 
     private void Awake()
     {
         bodySprites = Resources.LoadAll<Sprite>("Sprites/Character/body");
-        chestSprites = Resources.LoadAll<Sprite>("Sprites/Character/chest");
-        legSprites = Resources.LoadAll<Sprite>("Sprites/Character/legs");
         hairSprites = Resources.LoadAll<Sprite>("Sprites/Character/hair");
+
     }
 
-    // Start is called before the first frame update
     void Start()
     {
+        itemDB = ItemsDatabase.itemsDatabase;
         RefreshCharacters();
     }
 
@@ -54,7 +53,7 @@ public class LoadMenu : MonoBehaviour
                     }
                     newCharacters[f + adj] = characters[f];
                 }
-                string jsonOut = JsonHelper.ToJson(newCharacters, true);
+                string jsonOut = JsonConvert.SerializeObject(newCharacters, Formatting.Indented);
                 File.WriteAllText(Application.persistentDataPath + "/characters.config", jsonOut);
                 Debug.Log("Character " + characters[i].name + " has been deleted. RIP.");
             }
@@ -74,8 +73,7 @@ public class LoadMenu : MonoBehaviour
         {
             // Read the file and convert it to an array of Character objects
             string jsonIn = File.ReadAllText(Application.persistentDataPath + "/characters.config");
-            characters = new Character[JsonHelper.FromJson<Character>(jsonIn).Length];
-            characters = JsonHelper.FromJson<Character>(jsonIn);
+            characters = JsonConvert.DeserializeObject<Character[]>(jsonIn);
         }
 
         if (characters.Length > 0)
@@ -95,8 +93,8 @@ public class LoadMenu : MonoBehaviour
                 Transform charPreview = preview.transform.GetChild(1);
                 preview.GetComponent<Toggle>().group = viewportContent.GetComponent<ToggleGroup>();
                 charPreview.GetChild(0).gameObject.GetComponent<Image>().sprite = bodySprites[characters[i].bodyIndex];
-                charPreview.GetChild(1).gameObject.GetComponent<Image>().sprite = legSprites[characters[i].legsIndex];
-                charPreview.GetChild(2).gameObject.GetComponent<Image>().sprite = chestSprites[characters[i].chestIndex];
+                charPreview.GetChild(1).gameObject.GetComponent<Image>().sprite = itemDB.GetItem(characters[i].equipment[0]).Sprite;
+                charPreview.GetChild(2).gameObject.GetComponent<Image>().sprite = itemDB.GetItem(characters[i].equipment[1]).Sprite;
                 charPreview.GetChild(3).gameObject.GetComponent<Image>().sprite = hairSprites[characters[i].hairIndex];
 
                 Text txt = preview.transform.GetChild(2).gameObject.GetComponent<Text>();
@@ -115,14 +113,9 @@ public class LoadMenu : MonoBehaviour
             {
                 CharacterManager charMngr = CharacterManager.characterManager;
                 charMngr.activeChar = characters[i];
-                charMngr.body = bodySprites[characters[i].bodyIndex];
-                charMngr.legs = legSprites[characters[i].legsIndex];
-                charMngr.chest = chestSprites[characters[i].chestIndex];
-                charMngr.hair = hairSprites[characters[i].hairIndex];
                 break;
             }
         }
-        // CharacterManager.characterManager.LoadCharacter();
         SceneManager.LoadScene("MapManager");
     }
 }

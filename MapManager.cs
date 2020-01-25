@@ -36,12 +36,13 @@ public class MapManager : MonoBehaviour
 
     private void Start()
     {
-        masterMap = LoadWorld();
-        worldSize = (int)Mathf.Sqrt(masterMap.Length);
-        // Load the player's character (defaults to first character if one has not been set already)
+        // Force character to reload when the mapManager is started
         charMngr = CharacterManager.characterManager;
         charMngr.LoadCharacter();
-        worldPos = charMngr.activeChar.worldPos;
+
+        masterMap = LoadWorld();
+        worldSize = (int)Mathf.Sqrt(masterMap.Length);
+        worldPos = new Vector2Int( charMngr.activeChar.worldPos.x, charMngr.activeChar.worldPos.y );
         if (worldPos == new Vector2Int(-1,-1))
         {
             // ** this will be changed to force new players to load in a grassland biome with starter prefab
@@ -53,7 +54,7 @@ public class MapManager : MonoBehaviour
         {
             Directory.CreateDirectory(Application.persistentDataPath + "/Fields");
         }
-        ingameMenu = GameObject.Find("MenuScript").GetComponent<IngameMenu>();
+        ingameMenu = GameObject.Find("MenuScripts").GetComponent<IngameMenu>();
         LoadField(worldPos);
     }
     // Load a field from file or generate a new one
@@ -64,9 +65,9 @@ public class MapManager : MonoBehaviour
             Debug.Log("Attempt to leave this world denied. (Requested field outside worldMap limits)");
             return;
         }
-        // Apply changes to worldPos
+        // Apply changes to worldPos, and then update the current character's position to worldPos
         worldPos = pos;
-        charMngr.activeChar.worldPos = pos;
+        charMngr.activeChar.worldPos = new Vector2IntJson(worldPos);
         // try to load the requested field from file
         string file = worldPos.x + "_" + worldPos.y + ".json";
         if (File.Exists(Application.persistentDataPath + "/Fields/" + file))

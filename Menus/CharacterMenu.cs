@@ -1,23 +1,27 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Newtonsoft.Json;
 
 public class CharacterMenu : MonoBehaviour
 {
+    ItemsDatabase itemDB;
     private Sprite[] bodySprites;
-    private Sprite[] chestSprites;
-    private Sprite[] legSprites;
+    private List<Item> chestItems = new List<Item>();
+    private List<Item> legItems = new List<Item>();
     private Sprite[] hairSprites;
 
     public Image body;
     int b;
     public Image chest;
+    int localC;
     int c;
     public Image legs;
+    int localL;
     int l;
     public Image hair;
     int h;
@@ -27,17 +31,32 @@ public class CharacterMenu : MonoBehaviour
     void Awake()
     {
         bodySprites = Resources.LoadAll<Sprite>("Sprites/Character/body");
-        chestSprites = Resources.LoadAll<Sprite>("Sprites/Character/chest");
-        legSprites = Resources.LoadAll<Sprite>("Sprites/Character/legs");
         hairSprites = Resources.LoadAll<Sprite>("Sprites/Character/hair");
+
+        itemDB = ItemsDatabase.itemsDatabase;
     }
 
-    private void Start()
+    void Start()
     {
+        for (int i = 0; i < itemDB.ItemDatabase.Count; i++)
+        {
+            // Find starter chest items by their generic titles, this excludes any armours
+            string[] chests = { "Belted Shirt", "Tunic", "Blouse", "Overalls", "Dress", "Shirt", "Croptop"};
+            if ( Array.Exists(chests, item => item == itemDB.ItemDatabase[i].Title))
+            {
+                chestItems.Add(itemDB.ItemDatabase[i]);
+            }
+            // Like above but for legs
+            string[] leg = { "Pants", "Boots", "Slippers" };
+            if (Array.Exists(leg, item => item == itemDB.ItemDatabase[i].Title))
+            {
+                legItems.Add(itemDB.ItemDatabase[i]);
+            }
+        }
         RandomChar();
     }
 
-    int nextImg(Sprite[] sprites, Image img, int index, bool next)
+    int NextImg(Sprite[] sprites, Image img, int index, bool next)
     {
         // Get the index of the next image to load
         int i = next ? 1 : -1;
@@ -51,31 +70,54 @@ public class CharacterMenu : MonoBehaviour
         img.sprite = sprites[index];
         return index;
     }
-    public void nextBody(bool next)
+    // Loop through a shortened list of items
+    int NextItem(List<Item> items, Image img, int index, bool next)
     {
-        b = nextImg(bodySprites, body, b, next);
+        // Get the index of the next item to load
+        int i = next ? 1 : -1;
+        if (index + i >= items.Count)
+            index = 0;
+        else if (index + i < 0)
+            index = items.Count - 1;
+        else
+            index += i;
+
+        img.sprite = items[index].Sprite;
+        return index;
     }
-    public void nextChest(bool next)
+
+    public void NextBody(bool next)
     {
-        c = nextImg(chestSprites, chest, c, next);
+        b = NextImg(bodySprites, body, b, next);
     }
-    public void nextLegs(bool next)
+    public void NextChest(bool next)
     {
-        l = nextImg(legSprites, legs, l, next);
+        localC = NextItem(chestItems, chest, localC, next);
+        c = chestItems[localC].ID;
     }
-    public void nextHair(bool next)
+    public void NextLegs(bool next)
     {
-        h = nextImg(hairSprites, hair, h, next);
+        localL = NextItem(legItems, legs, localL, next);
+        l = legItems[localL].ID;
+    }
+    public void NextHair(bool next)
+    {
+        h = NextImg(hairSprites, hair, h, next);
     }
     public void RandomChar()
     {
-        b = Random.Range(0, bodySprites.Length);
+        b = UnityEngine.Random.Range(0, bodySprites.Length);
         body.sprite = bodySprites[b];
-        c = Random.Range(0, chestSprites.Length);
-        chest.sprite = chestSprites[c];
-        l = Random.Range(0, legSprites.Length);
-        legs.sprite = legSprites[l];
-        h = Random.Range(0, hairSprites.Length);
+
+        localC = UnityEngine.Random.Range(0, chestItems.Count);
+        c = chestItems[localC].ID;
+        chest.sprite = chestItems[localC].Sprite;
+
+        localL = UnityEngine.Random.Range(0, legItems.Count);
+        l = legItems[localL].ID;
+        legs.sprite = legItems[localL].Sprite;
+
+        h = UnityEngine.Random.Range(0, hairSprites.Length);
         hair.sprite = hairSprites[h];
     }
 
@@ -92,10 +134,10 @@ public class CharacterMenu : MonoBehaviour
             {
                 name = playerName.text,
                 bodyIndex = b,
-                chestIndex = c,
-                legsIndex = l,
-                hairIndex = h
+                hairIndex = h,
             };
+            character.equipment[0] = l;
+            character.equipment[1] = c;
 
             SaveCharacter(character);
         }
@@ -109,14 +151,14 @@ public class CharacterMenu : MonoBehaviour
         {
             // Read the file and convert it to an array of Character objects
             string jsonIn = File.ReadAllText(Application.persistentDataPath + "/characters.config");
-            characters = JsonHelper.FromJson<Character>(jsonIn);
+            characters = JsonConvert.DeserializeObject<Character[]>(jsonIn);
             // Check if a character with the same name already exists, and if it does- overwrite it
             for (int i = 0; i < characters.Length; i++)
             {
                 if (characters[i].name == character.name)
                 {
                     characters[i] = character;
-                    string jsonOut1 = JsonHelper.ToJson(characters, true);
+                    string jsonOut1 = JsonConvert.SerializeObject(characters, Formatting.Indented);
                     File.WriteAllText(Application.persistentDataPath + "/characters.config", jsonOut1);
                     Debug.Log("Character " + character.name + " has been overwritten.");
                     return;
@@ -131,7 +173,7 @@ public class CharacterMenu : MonoBehaviour
             }
             // And add the new character to the end of the array
             newCharacters[newCharacters.Length - 1] = character;
-            string jsonOut2 = JsonHelper.ToJson(newCharacters, true);
+            string jsonOut2 = JsonConvert.SerializeObject(newCharacters, Formatting.Indented);
             File.WriteAllText(Application.persistentDataPath + "/characters.config", jsonOut2);
             Debug.Log("New character " + character.name + " has been saved.");
         }
@@ -139,7 +181,7 @@ public class CharacterMenu : MonoBehaviour
         else
         {
             characters = new Character[] { character };
-            string jsonOut = JsonHelper.ToJson(characters, true);
+            string jsonOut = JsonConvert.SerializeObject(characters, Formatting.Indented);
 
             File.WriteAllText(Application.persistentDataPath + "/characters.config", jsonOut);
             Debug.Log("Config created and new character " + character.name + " has been saved.");

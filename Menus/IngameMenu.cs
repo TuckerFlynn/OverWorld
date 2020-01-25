@@ -7,32 +7,76 @@ using UnityEngine.SceneManagement;
 public class IngameMenu : MonoBehaviour
 {
     public GameObject escapeMenu;
+    public GameObject[] disableOnQuit;
+    public GameObject settingsMenu;
+    // HUD objects and related values
+    [Header("HUD")]
     public GameObject HUD;
     public Image minimapDisplay;
     public Text coordText;
     Texture2D minimapTex;
     public int zoom = 10;
+    // GUI objects and related values
+    [Header("GUI")]
+    public GameObject inventory;
 
     private void Start()
     {
         escapeMenu.SetActive(false);
+        settingsMenu.SetActive(false);
         HUD.SetActive(true);
+        inventory.SetActive(false);
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            escapeMenu.SetActive(!escapeMenu.activeSelf);
+            if (inventory.activeSelf)
+            {
+                inventory.SetActive(false);
+            }
+            else
+            {
+                escapeMenu.SetActive(!escapeMenu.activeSelf);
+                settingsMenu.SetActive(false);
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            inventory.SetActive(!inventory.activeSelf);
         }
     }
 
     public void QuitToMain(Camera main)
     {
-        main.gameObject.SetActive(false);
+        foreach(GameObject obj in disableOnQuit)
+        {
+            obj.SetActive(false);
+        }
         Destroy(CharacterManager.characterManager.gameObject);
         Destroy(MapManager.mapManager.gameObject);
         SceneManager.LoadSceneAsync("MainMenu");
+    }
+
+    public void Settings()
+    {
+        escapeMenu.SetActive(!escapeMenu.activeSelf);
+        settingsMenu.SetActive(!settingsMenu.activeSelf);
+    }
+    // Settings options
+    public void AdjustHudTransparency (Slider slider)
+    {
+        Image[] images = HUD.GetComponentsInChildren<Image>();
+        Text[] texts = HUD.GetComponentsInChildren<Text>();
+        foreach (Image image in images)
+        {
+            image.color = new Color(image.color.r, image.color.g, image.color.b, slider.value);
+        }
+        foreach (Text text in texts)
+        {
+            text.color = new Color(text.color.r, text.color.g, text.color.b, slider.value);
+        }
     }
 
     public void UpdateMinimap(Vector2Int worldPos)

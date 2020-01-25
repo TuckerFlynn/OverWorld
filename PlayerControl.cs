@@ -9,10 +9,12 @@ public class PlayerControl : MonoBehaviour
     bool inputUse = false;
 
     CharacterManager charMngr;
+    InventoryManager invenMngr;
 
     private void Start()
     {
         charMngr = CharacterManager.characterManager;
+        invenMngr = FindObjectOfType<InventoryManager>();
     }
 
     // Update is called once per frame
@@ -25,7 +27,7 @@ public class PlayerControl : MonoBehaviour
         {
             if (!inputUse && MapManager.mapManager != null)
             {
-                Vector2Int charWorldPos = charMngr.activeChar.worldPos;
+                Vector2Int charWorldPos = new Vector2Int( charMngr.activeChar.worldPos.x, charMngr.activeChar.worldPos.y);
                 // Check if the player is near an edge, and is trying to move out of the field
                 if (transform.position.x < 1.0f && horiIn < 0.0f)
                 {
@@ -60,5 +62,27 @@ public class PlayerControl : MonoBehaviour
         direction *= speed;
         //transform.position += direction;
         rb2D.velocity = new Vector2(direction.x, direction.y);
+    }
+
+    private void OnTriggerEnter2D(Collider2D col)
+    {
+        // If player collides with an item on the ground
+        if (col.gameObject.TryGetComponent<GroundItem>(out GroundItem groundItem))
+        {
+            int added = 0;
+            // Items are added one at a time to ensure correct stacking
+            for (int i = 0; i < groundItem.Quantity; i++)
+            {
+                // Add to inven returns false if there is no space
+                if (invenMngr.AddToInventory(groundItem.ID))
+                {
+                    added++;
+                }
+            }
+            if (added == groundItem.Quantity)
+                Destroy(col.gameObject);
+            else
+                groundItem.Quantity -= added;
+        }
     }
 }
