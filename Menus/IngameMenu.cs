@@ -19,6 +19,7 @@ public class IngameMenu : MonoBehaviour
     // GUI objects and related values
     [Header("GUI")]
     public GameObject inventory;
+    public GameObject logger;
 
     private void Start()
     {
@@ -26,10 +27,21 @@ public class IngameMenu : MonoBehaviour
         settingsMenu.SetActive(false);
         HUD.SetActive(true);
         inventory.SetActive(false);
+
+        logger = GameObject.Find("Logger");
     }
 
     void Update()
     {
+        // Prevents normal key actions while the looger input field is active
+        if (logger != null)
+        {
+            if (logger.GetComponentInChildren<InputField>().enabled)
+            {
+                return;
+            }
+        }
+        
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (inventory.activeSelf)
@@ -39,6 +51,10 @@ public class IngameMenu : MonoBehaviour
             else
             {
                 escapeMenu.SetActive(!escapeMenu.activeSelf);
+                if (System.Math.Abs(Time.timeScale) > float.Epsilon)
+                    Time.timeScale = 0;
+                else
+                    Time.timeScale = 1;
                 settingsMenu.SetActive(false);
             }
         }

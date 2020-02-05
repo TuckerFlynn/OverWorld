@@ -8,7 +8,9 @@ using UnityEngine.Tilemaps;
 public class FieldGenerator : MonoBehaviour
 {
     public Tilemap Ground;
+    public Tilemap Roof;
     public Tilemap Objects;
+    public GameObject Areas;
 
     public int mapSize = 64;
     Vector3Int[] positions;
@@ -19,6 +21,7 @@ public class FieldGenerator : MonoBehaviour
     public void MainBiomeGen(MapField field)
     {
         Ground.ClearAllTiles();
+        Roof.ClearAllTiles();
         Objects.ClearAllTiles();
 
         string biome = field.MainBiome;
@@ -62,30 +65,30 @@ public class FieldGenerator : MonoBehaviour
         }
     }
 
-    void GrasslandGen (MapField field)
+    void GrasslandGen(MapField field)
     {
         // Add basic ground tiles
-        TileBase grass1 = TilesetLoader.EnvrTiles[0];
-        TileBase grass2 = TilesetLoader.EnvrTiles[1];
+        TileBase grass1 = TilesetLoader.GroundTiles[0];
+        TileBase grass2 = TilesetLoader.GroundTiles[1];
         TileBase[] mainTiles = { grass1, grass2 };
         MainFill(Ground, mainTiles);
-        TileBase dirt1 = TilesetLoader.EnvrTiles[6];
-        TileBase dirt2 = TilesetLoader.EnvrTiles[7];
+        TileBase dirt1 = TilesetLoader.GroundTiles[6];
+        TileBase dirt2 = TilesetLoader.GroundTiles[7];
         TileBase[] secondaryTiles = { dirt1, dirt2 };
         SecondaryFill(0.3f, 3, 3, 5, Ground, secondaryTiles, null);
-        TileBase grass3 = TilesetLoader.EnvrTiles[2];
+        TileBase grass3 = TilesetLoader.GroundTiles[2];
         TileBase[] secondaryTiles2 = { grass3 };
         SecondaryFill(0.2f, 2, 3, 5, Ground, secondaryTiles2, null);
         // Add less common features like water bodies and stone outcrops
-        TileBase stone1 = TilesetLoader.EnvrTiles[3];
-        TileBase stone2 = TilesetLoader.EnvrTiles[4];
-        TileBase water1 = TilesetLoader.EnvrTiles[21];
+        TileBase stone1 = TilesetLoader.GroundTiles[3];
+        TileBase stone2 = TilesetLoader.GroundTiles[4];
+        TileBase water1 = TilesetLoader.GroundTiles[21];
         if (UnityEngine.Random.value < 0.1f)
         {
             int x = 10 + Mathf.RoundToInt(UnityEngine.Random.value * (mapSize - 20));
             int y = 10 + Mathf.RoundToInt(UnityEngine.Random.value * (mapSize - 20));
             int sizeRand = UnityEngine.Random.value > 0.95f ? 4 : 2;
-            BlobFill(x, y, sizeRand, sizeRand*20, 3, 0.6f, Ground, new TileBase[] { stone1, stone2 });
+            BlobFill(x, y, sizeRand, sizeRand * 20, 3, 0.6f, Ground, new TileBase[] { stone1, stone2 });
             // Add rocks
             float rockRand = 0.05f + UnityEngine.Random.value * 0.1f;           // value 0.05 to 0.15
             TileBase rock1 = TilesetLoader.PropTiles[0];
@@ -100,7 +103,7 @@ public class FieldGenerator : MonoBehaviour
             int x = 10 + Mathf.RoundToInt(UnityEngine.Random.value * (mapSize - 20));
             int y = 10 + Mathf.RoundToInt(UnityEngine.Random.value * (mapSize - 20));
             int sizeRand = UnityEngine.Random.value > 0.9f ? 4 : 2;
-            BlobFill(x, y, sizeRand, sizeRand*20, 3, 0.7f, Ground, new TileBase[] { water1 });
+            BlobFill(x, y, sizeRand, sizeRand * 20, 3, 0.7f, Ground, new TileBase[] { water1 });
         }
         // Add in grass and bushes
         float grassRand = 0.2f + UnityEngine.Random.value * 0.3f;               // value 0.20 to 0.50
@@ -109,7 +112,7 @@ public class FieldGenerator : MonoBehaviour
         TileBase bush1 = TilesetLoader.PlantTiles[6];
         TileBase[] plants1 = { tallGrass1, tallGrass2 };
         TileBase[] plants2 = { bush1 };
-        NestedFill(grassRand, 5, 2, 5, Objects, plants1, 0.1f, 6, plants2, Ground, dirt1, dirt2, grass3, stone1, stone2, water1 );
+        NestedFill(grassRand, 5, 2, 5, Objects, plants1, 0.1f, 6, plants2, Ground, dirt1, dirt2, grass3, stone1, stone2, water1);
         // Add in 2-tile tall trees
         float treeRand = 0.05f + UnityEngine.Random.value * 0.15f;              // value 0.05 to 0.20
         TileBase tallTree1 = TilesetLoader.PlantTiles[12];
@@ -117,22 +120,22 @@ public class FieldGenerator : MonoBehaviour
         NestedFill(treeRand, 2, 2, 6, Objects, new TileBase[] { tallTree1 }, 0.1f, 2, new TileBase[] { tallTree4 }, Ground, grass3, stone1, stone2, water1);
     }
 
-    void TemperateForestGen (MapField field)
+    void TemperateForestGen(MapField field)
     {
         // Add basic ground tiles
-        TileBase grass1 = TilesetLoader.EnvrTiles[0];
-        TileBase grass2 = TilesetLoader.EnvrTiles[1];
+        TileBase grass1 = TilesetLoader.GroundTiles[0];
+        TileBase grass2 = TilesetLoader.GroundTiles[1];
         TileBase[] tiles = { grass1, grass2 };
         MainFill(Ground, tiles);
         float dirtRand = 0.4f + UnityEngine.Random.value * 0.1f;                // value 0.40 to 0.50
-        TileBase dirt1 = TilesetLoader.EnvrTiles[6];
-        TileBase dirt2 = TilesetLoader.EnvrTiles[7];
+        TileBase dirt1 = TilesetLoader.GroundTiles[6];
+        TileBase dirt2 = TilesetLoader.GroundTiles[7];
         TileBase[] secondaryTiles = { dirt1, dirt2 };
         SecondaryFill(dirtRand, 3, 3, 5, Ground, secondaryTiles, null);
         // Add rare features like water bodies and stone outcrops
-        TileBase stone1 = TilesetLoader.EnvrTiles[3];
-        TileBase stone2 = TilesetLoader.EnvrTiles[4];
-        TileBase water1 = TilesetLoader.EnvrTiles[21];
+        TileBase stone1 = TilesetLoader.GroundTiles[3];
+        TileBase stone2 = TilesetLoader.GroundTiles[4];
+        TileBase water1 = TilesetLoader.GroundTiles[21];
         // Chance to add stone
         if (UnityEngine.Random.value < 0.2f)
         {
@@ -159,7 +162,7 @@ public class FieldGenerator : MonoBehaviour
         TileBase tallTree1 = TilesetLoader.PlantTiles[12];
         TileBase tallTree4 = TilesetLoader.PlantTiles[19];
         RequireFill(Objects, new TileBase[] { tallTree1 }, 0.9f, Ground, secondaryTiles);
-        float fruitRand = UnityEngine.Random.value > 0.95f ? 0.15f : 0.01f ;    // 5% chance of spawning 15% fruit trees, otherwise 1% fruit trees
+        float fruitRand = UnityEngine.Random.value > 0.95f ? 0.15f : 0.01f;    // 5% chance of spawning 15% fruit trees, otherwise 1% fruit trees
         RequireFill(Objects, new TileBase[] { tallTree4 }, fruitRand, Objects, new TileBase[] { tallTree1 });
         // Add in grass and bushes
         float grassRand = 0.2f + UnityEngine.Random.value * 0.2f;               // value 0.20 to 0.40
@@ -172,16 +175,16 @@ public class FieldGenerator : MonoBehaviour
         NestedFill(grassRand, 5, 2, 5, Objects, plants1, 0.2f, 4, plants2, Ground, dirt1, dirt2, water1);
     }
 
-    void DesertGen (MapField field)
+    void DesertGen(MapField field)
     {
         // Add main tiles
-        TileBase sand1 = TilesetLoader.EnvrTiles[9];
-        TileBase sand2 = TilesetLoader.EnvrTiles[10];
+        TileBase sand1 = TilesetLoader.GroundTiles[9];
+        TileBase sand2 = TilesetLoader.GroundTiles[10];
         TileBase[] tiles = { sand1, sand2 };
         MainFill(Ground, tiles);
         // Chance to have patches of dirt with dead trees
-        TileBase dirt1 = TilesetLoader.EnvrTiles[6];
-        TileBase dirt2 = TilesetLoader.EnvrTiles[7];
+        TileBase dirt1 = TilesetLoader.GroundTiles[6];
+        TileBase dirt2 = TilesetLoader.GroundTiles[7];
         if (UnityEngine.Random.value < 0.3f)
         {
             int x = 20 + Mathf.RoundToInt(UnityEngine.Random.value * (mapSize - 40));
@@ -194,8 +197,8 @@ public class FieldGenerator : MonoBehaviour
             RequireFill(Objects, new TileBase[] { tree5, tallTree5 }, 0.05f, Ground, new TileBase[] { dirt1, dirt2 });
         }
         // Very small chance to have an oasis
-        TileBase water1 = TilesetLoader.EnvrTiles[21];
-        TileBase water2 = TilesetLoader.EnvrTiles[22];
+        TileBase water1 = TilesetLoader.GroundTiles[21];
+        TileBase water2 = TilesetLoader.GroundTiles[22];
         if (UnityEngine.Random.value < field.Precip * 0.04f)                    // chance of oasis up to 1.2%, avg closer to 0.6%
         {
             // Most oases are just water surrounded by sand
@@ -209,8 +212,8 @@ public class FieldGenerator : MonoBehaviour
             // extremely rare oases that occur within the highest temperature deserts 
             else
             {
-                TileBase grass1 = TilesetLoader.EnvrTiles[0];
-                TileBase grass2 = TilesetLoader.EnvrTiles[1];
+                TileBase grass1 = TilesetLoader.GroundTiles[0];
+                TileBase grass2 = TilesetLoader.GroundTiles[1];
                 TileBase[] grass = { grass1, grass2 };
                 int x = 20 + Mathf.RoundToInt(UnityEngine.Random.value * (mapSize - 40));
                 int y = 20 + Mathf.RoundToInt(UnityEngine.Random.value * (mapSize - 40));
@@ -243,31 +246,31 @@ public class FieldGenerator : MonoBehaviour
         NestedFill(cactiRand, 3, 2, 5, Objects, cacti1, 0.05f, 1, cacti2, Ground, water1, water2);
     }
 
-    void BorealForestGen (MapField field)
+    void BorealForestGen(MapField field)
     {
 
-        TileBase dirt1 = TilesetLoader.EnvrTiles[6];
-        TileBase dirt2 = TilesetLoader.EnvrTiles[7];
+        TileBase dirt1 = TilesetLoader.GroundTiles[6];
+        TileBase dirt2 = TilesetLoader.GroundTiles[7];
         TileBase[] mainTiles = { dirt1, dirt2 };
         MainFill(Ground, mainTiles);
         // Boreal forest temp is 0.1 to 0.4 (0.5), precip is 0.3 to 0.7
         // If the temp is above 0.3 there will be grass and not snow, and more water than ice
         TileBase tempTile1;
         TileBase tempTile2;
-        TileBase water = TilesetLoader.EnvrTiles[24];
-        TileBase ice = TilesetLoader.EnvrTiles[26];
+        TileBase water = TilesetLoader.GroundTiles[24];
+        TileBase ice = TilesetLoader.GroundTiles[26];
         if (field.Temp > 0.3)
         {
             // Grass
             float grassRand = 0.45f + UnityEngine.Random.value * 0.1f;          // value 0.40 to 0.55
-            tempTile1 = TilesetLoader.EnvrTiles[0];
-            tempTile2 = TilesetLoader.EnvrTiles[1];
+            tempTile1 = TilesetLoader.GroundTiles[0];
+            tempTile2 = TilesetLoader.GroundTiles[1];
             TileBase[] secondaryTiles = { tempTile1, tempTile2 };
             SecondaryFill(grassRand, 5, 4, 5, Ground, secondaryTiles, null);
             // Water
             if (UnityEngine.Random.value < (field.Precip * field.Precip))
             {
-                water = TilesetLoader.EnvrTiles[23];
+                water = TilesetLoader.GroundTiles[23];
                 int x = 10 + Mathf.RoundToInt(UnityEngine.Random.value * (mapSize - 20));
                 int y = 10 + Mathf.RoundToInt(UnityEngine.Random.value * (mapSize - 20));
                 int sizeRand = UnityEngine.Random.value > 0.99f ? 4 : 2;
@@ -280,8 +283,8 @@ public class FieldGenerator : MonoBehaviour
             float snowBase = 0.35f + (field.Precip * 0.5f);                     // value 0.5 to 0.7
             float snowRand = snowBase + (UnityEngine.Random.value * 0.1f) - (field.Temp * 0.1f);    // value 0.35 to 0.77?
             snowRand = Mathf.Clamp(snowRand, 0.2f, 0.7f);
-            tempTile1 = TilesetLoader.EnvrTiles[12];
-            tempTile2 = TilesetLoader.EnvrTiles[13];
+            tempTile1 = TilesetLoader.GroundTiles[12];
+            tempTile2 = TilesetLoader.GroundTiles[13];
             TileBase[] secondaryTiles = { tempTile1, tempTile2 };
             SecondaryFill(snowRand, 5, 4, 5, Ground, secondaryTiles, null);
             // Water
@@ -294,12 +297,12 @@ public class FieldGenerator : MonoBehaviour
             }
         }
         // Add small stone patches
-        TileBase stone1 = TilesetLoader.EnvrTiles[3];
-        TileBase stone2 = TilesetLoader.EnvrTiles[4];
+        TileBase stone1 = TilesetLoader.GroundTiles[3];
+        TileBase stone2 = TilesetLoader.GroundTiles[4];
         TileBase[] secondaryTiles2 = { stone1, stone2 };
         SecondaryFill(0.2f, 2, 3, 5, Ground, secondaryTiles2, null);
         // Add tall grass; less grass if temp is below 0.25
-        float grassFill = field.Temp > 0.25 ? 0.25f: 0.1f;
+        float grassFill = field.Temp > 0.25 ? 0.25f : 0.1f;
         TileBase tallGrass1 = TilesetLoader.PlantTiles[22];
         TileBase tallGrass2 = TilesetLoader.PlantTiles[23];
         TileBase bush1 = TilesetLoader.PlantTiles[6];
@@ -322,19 +325,19 @@ public class FieldGenerator : MonoBehaviour
 
     void TundraGen(MapField field)
     {
-        TileBase dirt1 = TilesetLoader.EnvrTiles[6];
-        TileBase dirt2 = TilesetLoader.EnvrTiles[7];
+        TileBase dirt1 = TilesetLoader.GroundTiles[6];
+        TileBase dirt2 = TilesetLoader.GroundTiles[7];
         TileBase[] mainTiles = { dirt1, dirt2 };
         MainFill(Ground, mainTiles);
         // Add secondary tiles based on field temperature
         TileBase tempTile1;
         TileBase tempTile2;
-        TileBase mud1 = TilesetLoader.EnvrTiles[15];
-        TileBase mud2 = TilesetLoader.EnvrTiles[16];
+        TileBase mud1 = TilesetLoader.GroundTiles[15];
+        TileBase mud2 = TilesetLoader.GroundTiles[16];
         TileBase[] mud = { mud1, mud2 };
         SecondaryFill(0.5f, 3, 3, 6, Ground, mud, null);
-        TileBase water = TilesetLoader.EnvrTiles[24];
-        TileBase ice = TilesetLoader.EnvrTiles[26];
+        TileBase water = TilesetLoader.GroundTiles[24];
+        TileBase ice = TilesetLoader.GroundTiles[26];
         // Plants; also temp dependent (fruit bushes will grow on grass but not snow)
         TileBase tallGrass1 = TilesetLoader.PlantTiles[22];
         TileBase tallGrass2 = TilesetLoader.PlantTiles[23];
@@ -345,8 +348,8 @@ public class FieldGenerator : MonoBehaviour
         {
             // Grass
             float grassRand = 0.45f + (UnityEngine.Random.value * 0.1f);          // value 0.40 to 0.50 x
-            tempTile1 = TilesetLoader.EnvrTiles[0];
-            tempTile2 = TilesetLoader.EnvrTiles[1];
+            tempTile1 = TilesetLoader.GroundTiles[0];
+            tempTile2 = TilesetLoader.GroundTiles[1];
             TileBase[] grass = { tempTile1, tempTile2 };
             SecondaryFill(grassRand, 5, 4, 5, Ground, grass, null);
             // Water; possibility of having multiple seperate ponds
@@ -373,8 +376,8 @@ public class FieldGenerator : MonoBehaviour
             float snowBase = 0.4f + (field.Precip * 0.5f);                     // value 0.5 to 0.7 x
             float snowRand = snowBase + (UnityEngine.Random.value * 0.1f) - (field.Temp * 0.1f);    // value 0.35 to 0.77 x
             snowRand = Mathf.Clamp(snowRand, 0.2f, 0.7f);
-            tempTile1 = TilesetLoader.EnvrTiles[12];
-            tempTile2 = TilesetLoader.EnvrTiles[13];
+            tempTile1 = TilesetLoader.GroundTiles[12];
+            tempTile2 = TilesetLoader.GroundTiles[13];
             TileBase[] snow = { tempTile1, tempTile2 };
             SecondaryFill(snowRand, 5, 4, 5, Ground, snow, null);
             // Water; possibility of having multiple seperate ponds
@@ -407,20 +410,20 @@ public class FieldGenerator : MonoBehaviour
 
     void ArcticGen(MapField field)
     {
-        TileBase snow1 = TilesetLoader.EnvrTiles[12];
-        TileBase snow2 = TilesetLoader.EnvrTiles[13];
+        TileBase snow1 = TilesetLoader.GroundTiles[12];
+        TileBase snow2 = TilesetLoader.GroundTiles[13];
         TileBase[] snow = { snow1, snow2 };
         MainFill(Ground, snow);
         // Stone surrounded by rocky snow
         float stoneRand = 0.45f + (UnityEngine.Random.value * 0.1f);
-        TileBase snow3 = TilesetLoader.EnvrTiles[14];
-        TileBase stone1 = TilesetLoader.EnvrTiles[3];
-        TileBase stone2 = TilesetLoader.EnvrTiles[4];
+        TileBase snow3 = TilesetLoader.GroundTiles[14];
+        TileBase stone1 = TilesetLoader.GroundTiles[3];
+        TileBase stone2 = TilesetLoader.GroundTiles[4];
         TileBase[] stone = { stone1, stone2 };
         NestedFill(stoneRand, 4, 4, 5, Ground, new TileBase[] { snow3 }, 0.8f, 7, stone, null);
         // Water
-        TileBase water = TilesetLoader.EnvrTiles[25];
-        TileBase ice = TilesetLoader.EnvrTiles[27];
+        TileBase water = TilesetLoader.GroundTiles[25];
+        TileBase ice = TilesetLoader.GroundTiles[27];
         // 80% chance of spawning small ponds, 20% chance of larger
         if (UnityEngine.Random.value < 0.8f)
         {
@@ -465,14 +468,14 @@ public class FieldGenerator : MonoBehaviour
 
     void ArcticWasteGen(MapField field)
     {
-        TileBase snow1 = TilesetLoader.EnvrTiles[12];
-        TileBase snow2 = TilesetLoader.EnvrTiles[13];
+        TileBase snow1 = TilesetLoader.GroundTiles[12];
+        TileBase snow2 = TilesetLoader.GroundTiles[13];
         TileBase[] snow = { snow1, snow2 };
         MainFill(Ground, snow);
         float stoneRand = 0.6f + (UnityEngine.Random.value * 0.1f);
-        TileBase snow3 = TilesetLoader.EnvrTiles[14];
-        TileBase stone1 = TilesetLoader.EnvrTiles[3];
-        TileBase stone2 = TilesetLoader.EnvrTiles[4];
+        TileBase snow3 = TilesetLoader.GroundTiles[14];
+        TileBase stone1 = TilesetLoader.GroundTiles[3];
+        TileBase stone2 = TilesetLoader.GroundTiles[4];
         TileBase[] stone = { stone1, stone2 };
         NestedFill(stoneRand, 4, 4, 5, Ground, new TileBase[] { snow3 }, 0.9f, 7, stone, null);
         // Rocks
@@ -486,8 +489,8 @@ public class FieldGenerator : MonoBehaviour
 
     void BogGen(MapField field)
     {
-        TileBase water = TilesetLoader.EnvrTiles[24];
-        TileBase ice = TilesetLoader.EnvrTiles[26];
+        TileBase water = TilesetLoader.GroundTiles[24];
+        TileBase ice = TilesetLoader.GroundTiles[26];
         if (field.Temp > 0.3f)
         {
             MainFill(Ground, new TileBase[] { water });
@@ -501,10 +504,10 @@ public class FieldGenerator : MonoBehaviour
         // Islands fo mud and dirt
         float mudRand = (UnityEngine.Random.value * 0.2f) + field.Temp + (1.0f - field.Precip);     // value (0.0 to 0.2) + (0.2 to 0.4) + (0.0 to 0.3)
         float dirtRand = 1.0f - field.Precip;
-        TileBase mud1 = TilesetLoader.EnvrTiles[15];
-        TileBase mud2 = TilesetLoader.EnvrTiles[16];
-        TileBase dirt1 = TilesetLoader.EnvrTiles[6];
-        TileBase dirt2 = TilesetLoader.EnvrTiles[7];
+        TileBase mud1 = TilesetLoader.GroundTiles[15];
+        TileBase mud2 = TilesetLoader.GroundTiles[16];
+        TileBase dirt1 = TilesetLoader.GroundTiles[6];
+        TileBase dirt2 = TilesetLoader.GroundTiles[7];
         TileBase[] mud = { mud1, mud2 };
         TileBase[] dirt = { dirt1, dirt2 };
         NestedFill(mudRand, 2, 4, 5, Ground, mud, dirtRand, 7, dirt, null);
@@ -524,14 +527,14 @@ public class FieldGenerator : MonoBehaviour
 
     void SwampGen(MapField field)
     {
-        TileBase water = TilesetLoader.EnvrTiles[24];
+        TileBase water = TilesetLoader.GroundTiles[24];
         MainFill(Ground, new TileBase[] { water });
         float mudRand = (UnityEngine.Random.value * 0.2f) + (field.Temp * 0.5f);     // value (0.0 to 0.2) + (0.2 to 0.4)
         float dirtRand = 1.0f - field.Temp;
-        TileBase mud1 = TilesetLoader.EnvrTiles[15];
-        TileBase mud2 = TilesetLoader.EnvrTiles[16];
-        TileBase dirt1 = TilesetLoader.EnvrTiles[6];
-        TileBase dirt2 = TilesetLoader.EnvrTiles[7];
+        TileBase mud1 = TilesetLoader.GroundTiles[15];
+        TileBase mud2 = TilesetLoader.GroundTiles[16];
+        TileBase dirt1 = TilesetLoader.GroundTiles[6];
+        TileBase dirt2 = TilesetLoader.GroundTiles[7];
         TileBase[] mud = { mud1, mud2 };
         TileBase[] dirt = { dirt1, dirt2 };
         NestedFill(mudRand, 2, 4, 5, Ground, mud, dirtRand, 7, dirt, null);
@@ -562,23 +565,23 @@ public class FieldGenerator : MonoBehaviour
     void TemperateJungleGen(MapField field)
     {
         // Add basic ground tiles
-        TileBase grass1 = TilesetLoader.EnvrTiles[0];
-        TileBase grass2 = TilesetLoader.EnvrTiles[1];
+        TileBase grass1 = TilesetLoader.GroundTiles[0];
+        TileBase grass2 = TilesetLoader.GroundTiles[1];
         TileBase[] grass = { grass1, grass2 };
         MainFill(Ground, grass);
         float dirtRand = 0.5f + UnityEngine.Random.value * 0.1f;                // value 0.50 to 0.60
-        TileBase dirt1 = TilesetLoader.EnvrTiles[6];
-        TileBase dirt2 = TilesetLoader.EnvrTiles[7];
-        TileBase mud1 = TilesetLoader.EnvrTiles[15];
-        TileBase mud2 = TilesetLoader.EnvrTiles[16];
+        TileBase dirt1 = TilesetLoader.GroundTiles[6];
+        TileBase dirt2 = TilesetLoader.GroundTiles[7];
+        TileBase mud1 = TilesetLoader.GroundTiles[15];
+        TileBase mud2 = TilesetLoader.GroundTiles[16];
         TileBase[] dirt = { dirt1, dirt2 };
         TileBase[] mud = { mud1, mud2 };
         SecondaryFill(dirtRand, 3, 3, 5, Ground, mud, null);
         SecondaryFill(dirtRand, 3, 3, 5, Ground, dirt, null);
         // Add rare features like water bodies and stone outcrops
-        TileBase stone1 = TilesetLoader.EnvrTiles[3];
-        TileBase stone2 = TilesetLoader.EnvrTiles[4];
-        TileBase water = TilesetLoader.EnvrTiles[21];
+        TileBase stone1 = TilesetLoader.GroundTiles[3];
+        TileBase stone2 = TilesetLoader.GroundTiles[4];
+        TileBase water = TilesetLoader.GroundTiles[21];
         // Chance to add stone
         if (UnityEngine.Random.value < 0.2f)
         {
@@ -619,23 +622,23 @@ public class FieldGenerator : MonoBehaviour
     void TropicalJungleGen(MapField field)
     {
         // Add basic ground tiles
-        TileBase grass1 = TilesetLoader.EnvrTiles[0];
-        TileBase grass2 = TilesetLoader.EnvrTiles[1];
+        TileBase grass1 = TilesetLoader.GroundTiles[0];
+        TileBase grass2 = TilesetLoader.GroundTiles[1];
         TileBase[] grass = { grass1, grass2 };
         MainFill(Ground, grass);
         float dirtRand = 0.5f + UnityEngine.Random.value * 0.1f;                // value 0.50 to 0.60
-        TileBase dirt1 = TilesetLoader.EnvrTiles[6];
-        TileBase dirt2 = TilesetLoader.EnvrTiles[7];
-        TileBase mud1 = TilesetLoader.EnvrTiles[15];
-        TileBase mud2 = TilesetLoader.EnvrTiles[16];
+        TileBase dirt1 = TilesetLoader.GroundTiles[6];
+        TileBase dirt2 = TilesetLoader.GroundTiles[7];
+        TileBase mud1 = TilesetLoader.GroundTiles[15];
+        TileBase mud2 = TilesetLoader.GroundTiles[16];
         TileBase[] dirt = { dirt1, dirt2 };
         TileBase[] mud = { mud1, mud2 };
         SecondaryFill(dirtRand, 3, 3, 5, Ground, dirt, null);
         SecondaryFill(dirtRand, 3, 3, 5, Ground, mud, null);
         // Add rare features like water bodies and stone outcrops
-        TileBase stone1 = TilesetLoader.EnvrTiles[3];
-        TileBase stone2 = TilesetLoader.EnvrTiles[4];
-        EnvrAdvTile water = TilesetLoader.EnvrTiles[24] as EnvrAdvTile;
+        TileBase stone1 = TilesetLoader.GroundTiles[3];
+        TileBase stone2 = TilesetLoader.GroundTiles[4];
+        EnvrAdvTile water = TilesetLoader.GroundTiles[24] as EnvrAdvTile;
 
         // Chance to add stone
         if (UnityEngine.Random.value < 0.1f)
@@ -692,7 +695,7 @@ public class FieldGenerator : MonoBehaviour
     }
 
     // Fill the entire tilemap randomly with tiles
-    void MainFill (Tilemap map, TileBase[] tiles)
+    void MainFill(Tilemap map, TileBase[] tiles)
     {
         // Clear old positions and tiles
         positions = new Vector3Int[mapSize * mapSize];
@@ -711,7 +714,7 @@ public class FieldGenerator : MonoBehaviour
     void SecondaryFill(float init, int steps, int deathLim, int birthLim, Tilemap map, TileBase[] tiles, Tilemap exclude, params TileBase[] excludes)
     {
         // Create and initialise nested array for automata
-        bool[,] cellMap = new bool[mapSize,mapSize];
+        bool[,] cellMap = new bool[mapSize, mapSize];
         cellMap = InitialiseMap(cellMap, init);
         // Run automata steps
         for (int i = 0; i < steps; i++)
@@ -723,7 +726,7 @@ public class FieldGenerator : MonoBehaviour
         {
             int x = index % mapSize;
             int y = index / mapSize;
-            if (cellMap[x,y])
+            if (cellMap[x, y])
             {
                 Vector3Int vect = new Vector3Int(x, y, 0);
                 if (exclude != null)
@@ -752,14 +755,14 @@ public class FieldGenerator : MonoBehaviour
                 }
                 else
                 {
-                    map[x, y] = false; 
+                    map[x, y] = false;
                 }
             }
         }
         return map;
     }
 
-    bool[,] AutomataStep (bool[,] map, int deathLim, int birthLim)
+    bool[,] AutomataStep(bool[,] map, int deathLim, int birthLim)
     {
         bool[,] newMap = map;
         for (int x = 0; x < mapSize; x++)
@@ -768,13 +771,13 @@ public class FieldGenerator : MonoBehaviour
             {
                 int nbs = CountAliveNeighbours(map, x, y);
                 //First, if a cell is alive but has too few neighbours, kill it.
-                if (map[x,y])
+                if (map[x, y])
                 {
-                    newMap[x,y] = nbs >= deathLim;
+                    newMap[x, y] = nbs >= deathLim;
                 } //Otherwise, if the cell is dead now, check if it has the right number of neighbours to be 'born'
                 else
                 {
-                    newMap[x,y] = nbs > birthLim;
+                    newMap[x, y] = nbs > birthLim;
                 }
             }
         }
@@ -801,7 +804,7 @@ public class FieldGenerator : MonoBehaviour
                     // nothin
                 }
                 //Otherwise, a normal check of the neighbour
-                else if (map[neighbour_x,neighbour_y])
+                else if (map[neighbour_x, neighbour_y])
                 {
                     count++;
                 }
@@ -811,7 +814,7 @@ public class FieldGenerator : MonoBehaviour
     }
 
     // Functions for adding clusters of a set of tiles, with a small chance of adding tiles from a second set
-    void NestedFill (float init, int steps, int deathLim, int birthLim, Tilemap map, TileBase[] primary, float chance, int nbrs, TileBase[] secondary, Tilemap exclude, params TileBase[] excludes)
+    void NestedFill(float init, int steps, int deathLim, int birthLim, Tilemap map, TileBase[] primary, float chance, int nbrs, TileBase[] secondary, Tilemap exclude, params TileBase[] excludes)
     {
         // Create and initialise nested array for automata
         bool[,] cellMap = new bool[mapSize, mapSize];
@@ -892,7 +895,7 @@ public class FieldGenerator : MonoBehaviour
         }
     }
 
-    bool[,] InitialiseBloob (bool[,] map, int X, int Y, int minSize)
+    bool[,] InitialiseBloob(bool[,] map, int X, int Y, int minSize)
     {
         for (int x = X; x < X + minSize; x++)
         {
@@ -911,15 +914,15 @@ public class FieldGenerator : MonoBehaviour
         return map;
     }
 
-    bool[,] BloobStep (bool[,] map, int X, int Y, int maxSize, float p)
+    bool[,] BloobStep(bool[,] map, int X, int Y, int maxSize, float p)
     {
         bool[,] newMap = map;
         // Check that maxsize/2 is still an int
         if (maxSize % 2 != 0) maxSize++;
 
-        for (int x = X - maxSize/2; x < X + maxSize/2; x++)
+        for (int x = X - maxSize / 2; x < X + maxSize / 2; x++)
         {
-            for (int y = Y - maxSize/2; y < Y + maxSize/2; y++)
+            for (int y = Y - maxSize / 2; y < Y + maxSize / 2; y++)
             {
                 if (x < 0 || y < 0 || x > mapSize - 1 || y > mapSize - 1)
                 {
@@ -928,7 +931,7 @@ public class FieldGenerator : MonoBehaviour
                 else
                 {
                     int nbrs = CountAliveNeighbours(map, x, y);
-                    if (nbrs > 1 && !map[x,y])
+                    if (nbrs > 1 && !map[x, y])
                     {
                         newMap[x, y] = UnityEngine.Random.value < p;
                     }

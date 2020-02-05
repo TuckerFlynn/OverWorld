@@ -220,6 +220,7 @@ namespace UnityEngine.Tilemaps
             EditorGUI.BeginChangeCheck();
             tile.DefaultGameObject = (GameObject)EditorGUILayout.ObjectField("GameObject", tile.DefaultGameObject, typeof(GameObject), false, null);
             tile.DefaultColliderType = (Tile.ColliderType)EditorGUILayout.EnumPopup("Default Collider", tile.DefaultColliderType);
+            tile.group = EditorGUILayout.TextField("Group", tile.group);
             tile.moveCost = EditorGUILayout.FloatField("Movement cost", tile.moveCost);
             tile.sister = (TileBase)EditorGUILayout.ObjectField("Sister Tile", tile.sister, typeof(TileBase), false, null);
             tile.m_Sprites[0] = (Sprite)EditorGUILayout.ObjectField("Filled", tile.m_Sprites[0], typeof(Sprite), false, null);

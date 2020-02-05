@@ -48,6 +48,11 @@ public class ItemsDatabase : MonoBehaviour
         {
             return new Item();
         }
+        if (id > ItemDatabase.Count)
+        {
+            Debug.Log("Item ID " + id + " outside of ItemDatabase range");
+            return new Item();
+        }
 
         return ItemDatabase.Find(item => item.ID == id);
     }

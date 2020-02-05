@@ -32,21 +32,25 @@ public class PlayerControl : MonoBehaviour
                 if (transform.position.x < 1.0f && horiIn < 0.0f)
                 {
                     transform.position = new Vector3(63.5f, transform.position.y);
+                    MapManager.mapManager.SaveFieldFile(charWorldPos);
                     MapManager.mapManager.LoadField(charWorldPos + Vector2Int.left);
                 }
                 else if (transform.position.x > 63.0f && horiIn > 0.0f)
                 {
                     transform.position = new Vector3(0.5f, transform.position.y);
+                    MapManager.mapManager.SaveFieldFile(charWorldPos);
                     MapManager.mapManager.LoadField(charWorldPos + Vector2Int.right);
                 }
                 else if (transform.position.y < 0.5f && vertIn < 0.0f)
                 {
                     transform.position = new Vector3(transform.position.x, 63.0f);
+                    MapManager.mapManager.SaveFieldFile(charWorldPos);
                     MapManager.mapManager.LoadField(charWorldPos + Vector2Int.down);
                 }
                 else if (transform.position.y > 62.5f && vertIn > 0.0f)
                 {
                     transform.position = new Vector3(transform.position.x, 0.0f);
+                    MapManager.mapManager.SaveFieldFile(charWorldPos);
                     MapManager.mapManager.LoadField(charWorldPos + Vector2Int.up);
                 }
                 inputUse = true;

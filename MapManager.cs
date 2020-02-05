@@ -12,7 +12,11 @@ public class MapManager : MonoBehaviour
     public int worldSize;
     [Header("Tilemaps")]
     public Tilemap Ground;
+    public Tilemap Roof;
     public Tilemap Objects;
+    [Header("Area Objects")]
+    public GameObject Areas;
+    public GameObject[] AreaObjects;
 
     public MapField[] masterMap;
     public Vector2Int worldPos;
@@ -68,6 +72,12 @@ public class MapManager : MonoBehaviour
         // Apply changes to worldPos, and then update the current character's position to worldPos
         worldPos = pos;
         charMngr.activeChar.worldPos = new Vector2IntJson(worldPos);
+
+        // Clear all children of the Areas gameobject
+        List<GameObject> children = new List<GameObject>();
+        foreach (Transform child in Areas.transform) children.Add(child.gameObject);
+        children.ForEach(child => Destroy(child));
+
         // try to load the requested field from file
         string file = worldPos.x + "_" + worldPos.y + ".json";
         if (File.Exists(Application.persistentDataPath + "/Fields/" + file))
@@ -92,8 +102,10 @@ public class MapManager : MonoBehaviour
     {
         // Create TiledMap object to convert to JSON
         TiledMap tiled = TiledHelper.CreateGeneric();
-        TiledTileLayer groundLayer  = (TiledTileLayer)tiled.layers[0];
-        TiledObjectLayer objectLayer = (TiledObjectLayer)tiled.layers[1];
+        TiledTileLayer groundLayer = (TiledTileLayer)tiled.layers[0];
+        TiledTileLayer roofLayer = (TiledTileLayer)tiled.layers[1];
+        TiledObjectLayer objectLayer = (TiledObjectLayer)tiled.layers[2];
+        TiledObjectLayer areasLayer = (TiledObjectLayer)tiled.layers[3];
 
         for (int i = 0; i < tiled.height * tiled.width; i++)
         {
@@ -106,8 +118,23 @@ public class MapManager : MonoBehaviour
             {
                 if (IsTileOfType<EnvrTile>(Ground, vect) || IsTileOfType<EnvrAdvTile>(Ground, vect))
                 {
+                    
                     EnvrTile current = (EnvrTile)Ground.GetTile(vect);
-                    groundLayer.data[i] = TilesetLoader.EnvrTiles.IndexOf(current) + 1;
+                    if (current.group == "ground" || current.group == "liquid")
+                        groundLayer.data[i] = TilesetLoader.GroundTiles.IndexOf(current) + 1;
+                    else if (current.group == "building" || current.group == "roof")
+                        groundLayer.data[i] = TilesetLoader.BuildingTiles.IndexOf(current) + tiled.tilesets[3].firstgid;
+                }
+            }
+            if (Roof.HasTile(vect))
+            {
+                if (IsTileOfType<EnvrTile>(Roof, vect) || IsTileOfType<EnvrAdvTile>(Roof, vect))
+                {
+                    EnvrTile current = (EnvrTile)Roof.GetTile(vect);
+                    if (current.group == "ground" || current.group == "liquid")
+                        roofLayer.data[i] = TilesetLoader.GroundTiles.IndexOf(current) + 1;
+                    else if (current.group == "building" || current.group == "roof")
+                        roofLayer.data[i] = TilesetLoader.BuildingTiles.IndexOf(current) + tiled.tilesets[3].firstgid;
                 }
             }
             if (Objects.HasTile(vect))
@@ -136,8 +163,26 @@ public class MapManager : MonoBehaviour
                 }
             }
         }
+
+        // Loop through children of Areas and grab type, location, and size info
+        int count = Areas.transform.childCount;
+        for (int i = 0; i < count; i++)
+        {
+            GameObject area = Areas.transform.GetChild(i).gameObject;
+            TiledObject tiledObject;
+
+            if (area.TryGetComponent<RoofArea>(out RoofArea script))
+            {
+                tiledObject = script.thisTiledObject;
+                areasLayer.objects.Add(tiledObject);
+            }
+            
+        }
+
         tiled.layers[0] = groundLayer as TiledLayer;
-        tiled.layers[1] = objectLayer as TiledLayer;
+        tiled.layers[1] = roofLayer as TiledLayer;
+        tiled.layers[2] = objectLayer as TiledLayer;
+        tiled.layers[3] = areasLayer as TiledLayer;
 
         string path = Application.persistentDataPath + "/Fields/" + pos.x + "_" + pos.y + ".json";
         string json = TiledHelper.WriteJsonMap(tiled);
@@ -146,67 +191,57 @@ public class MapManager : MonoBehaviour
 
     public void LoadFieldFile(Vector2Int pos)
     {
+        // Open the json file and convert the contents into a TiledMap object
         string path = Application.persistentDataPath + "/Fields/" + pos.x + "_" + pos.y + ".json";
         TiledMap tiled = TiledHelper.OpenJsonMap(path);
 
         Vector3Int[] positions = new Vector3Int[tiled.height * tiled.width];
         TileBase[] groundArray = new TileBase[tiled.height * tiled.width];
+        TileBase[] roofArray = new TileBase[tiled.height * tiled.width];
         TileBase[] objectsArray = new TileBase[tiled.height * tiled.width];
 
+        // GROUND & ROOF LAYERS
         for (int i = 0; i < tiled.height * tiled.width; i++)
         {
+            // Get the tilemap position vector from the index
             int X = i % 64;
             int Y = 63 - Mathf.FloorToInt(i / 64);
             positions[i] = new Vector3Int(X, Y, 0);
-            TiledLayer tileLayer = tiled.layers[0];
-            int tileIndex = tileLayer.data[i] - tiled.tilesets[0].firstgid;
 
-            if (tileIndex < 0 || tileIndex > TilesetLoader.EnvrTiles.Count)
-            {
-                Debug.Log("Index out of range for ground tile: " + tileIndex);
-                continue;
-            }
+            // GROUND
+            TiledLayer groundLayer = tiled.layers[0];
+            groundArray[i] = TiledHelper.ReadTileLayer(tiled, groundLayer, i);
 
-            groundArray[i] = TilesetLoader.EnvrTiles[tileIndex];
+            // ROOF
+            TiledLayer roofLayer = tiled.layers[1];
+            roofArray[i] = TiledHelper.ReadTileLayer(tiled, roofLayer, i);
         }
-
-        TiledLayer objectLayer = tiled.layers[1];
+        // OBJECT LAYER
+        TiledLayer objectLayer = tiled.layers[2];
         for (int i = 0; i < objectLayer.objects.Count; i++)
         {
-            TiledObject tObj = objectLayer.objects[i];
-            // Get the tilemap position index (not coords) from the TiledObject
-            int X = Mathf.FloorToInt(tObj.x / 16);
-            int Y = Mathf.FloorToInt(tObj.y / 16) - 1;
-            int posIndex = CoordToId(new Vector2Int(X, Y), 64);
-            // Get the tile ID adjusted by firstgid for the corresponding tileset
-            if (tObj.gid < tiled.tilesets[2].firstgid)
-            {
-                int gidAdjust = tiled.tilesets[1].firstgid;
-                int tileIndex = tObj.gid - gidAdjust;
-                if (tileIndex < 0 || tileIndex > TilesetLoader.PlantTiles.Count)
-                {
-                    // If the tileIndex is found to be -1, this means a tile was saved that doesn't exist in the TilesetLoader
-                    Debug.Log("Index out of range for plant tile: " + tileIndex);
-                    continue;
-                }
-                objectsArray[posIndex] = TilesetLoader.PlantTiles[tileIndex];
-            }
-            else
-            {
-                int gidAdjust = tiled.tilesets[2].firstgid;
-                int tileIndex = tObj.gid - gidAdjust;
-                if (tileIndex < 0 || tileIndex > TilesetLoader.PropTiles.Count)
-                {
-                    // If the tileIndex is found to be -1, this means a tile was saved that doesn't exist in the TilesetLoader
-                    Debug.Log("Index out of range for prop tile: " + tileIndex);
-                    continue;
-                }
-                objectsArray[posIndex] = TilesetLoader.PropTiles[tileIndex];
-            }
+            ObjectRef obj = TiledHelper.ReadObjectLayer(tiled, objectLayer, i);
+            objectsArray[obj.index] = obj.tileBase;
         }
 
         Ground.SetTiles(positions, groundArray);
+        Roof.SetTiles(positions, roofArray);
         Objects.SetTiles(positions, objectsArray);
+
+        // AREA LAYER: must be run after the tilemaps have been set because generated areas need to read the tiles underneath depending on their type
+        TiledLayer areaLayer = tiled.layers[3];
+        for (int i = 0; i < areaLayer.objects.Count; i++)
+        {
+            TiledObject tObj = areaLayer.objects[i];
+            // The area type is used to determine what gameobject needs to be instantiated, and passes the other area properties to that gameobject
+            if (tObj.type == "roof")
+            {
+                // The TiledObject data is passed to the attached script to handle additonal setup
+                GameObject instance = Instantiate(AreaObjects[0]);
+                instance.transform.SetParent(Areas.transform);
+                instance.GetComponent<RoofArea>().CreateRoofArea(tObj, Roof, Vector3Int.zero, 0);
+            }
+        }
     }
 
     // Load the world map from file

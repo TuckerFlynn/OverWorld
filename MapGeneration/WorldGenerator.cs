@@ -447,7 +447,8 @@ public class WorldGenerator : MonoBehaviour {
     void RunRivers () {
         int h = hikerCount * maxHikeLength;
         float swimCount = swimmerCount;
-        while (swimCount > 0) {
+        int seedAttempts = 0;
+        while (swimCount > 0 && seedAttempts < swimmerCount * 100) {
             // The starting point of the Swimmer is set with a random (x,y) coordinate similar to the Hikers
             Vector2Int start = new Vector2Int(hash.Range(0, worldSize, h + 1), hash.Range(0, worldSize, h + 2));
             // Crude (but still fast enoguh) method to find starting points with a high elevation
@@ -468,6 +469,7 @@ public class WorldGenerator : MonoBehaviour {
                 }
                 swimCount--;
             }
+            seedAttempts++;
             h += 2;
         }
     }

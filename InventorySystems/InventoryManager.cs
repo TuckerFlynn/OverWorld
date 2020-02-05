@@ -67,6 +67,12 @@ public class InventoryManager : MonoBehaviour
                 tooltip.transform.position = result.gameObject.transform.position + tooltipScript.offset;
                 if (tooltipScript.panel == "Equipment")
                 {
+                    if (string.IsNullOrEmpty(Equipment[tooltipScript.index].Item.Description))
+                    {
+                        tooltip.SetActive(false);
+                        return;
+                    }
+
                     StringBuilder builder = new StringBuilder();
                     builder.Append("<size=7><color='white'>");
                     builder.Append(Equipment[tooltipScript.index].Item.Title);
@@ -126,12 +132,13 @@ public class InventoryManager : MonoBehaviour
         {
             if (Equipment[i].Quantity > 0)
             {
-                equipImages[i].enabled = true;
                 equipImages[i].sprite = Equipment[i].Item.Sprite;
+                equipImages[i].raycastTarget = true;
             }
             else
             {
-                equipImages[i].enabled = false;
+                equipImages[i].sprite = equipImages[i].gameObject.GetComponent<ItemDragHandler>().DefaultSprite;
+                equipImages[i].raycastTarget = false;
             }
         }
         // Load the array of inventory content and refresh the sprites
@@ -142,6 +149,7 @@ public class InventoryManager : MonoBehaviour
             if (Inventory[i].Quantity > 0)
             {
                 image.GetComponent<Image>().enabled = true;
+                image.GetComponent<Image>().raycastTarget = true;
                 image.GetComponent<Image>().sprite = Inventory[i].Item.Sprite;
                 text.GetComponent<Text>().enabled = true;
                 text.GetComponent<Text>().text = Inventory[i].Quantity.ToString();

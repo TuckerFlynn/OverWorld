@@ -14,6 +14,7 @@ namespace UnityEngine.Tilemaps
         [SerializeField]
         public Sprite DefaultSprite;
         public GameObject DefaultGameObject;
+        public string group;
         public float moveCost = 1.0f;
         public Tile.ColliderType DefaultColliderType = Tile.ColliderType.None;
 
@@ -22,7 +23,6 @@ namespace UnityEngine.Tilemaps
             tileData.sprite = DefaultSprite;
             tileData.gameObject = DefaultGameObject;
             tileData.colliderType = DefaultColliderType;
-            //base.GetTileData(position, tilemap, ref tileData);
         }
     }
 
@@ -37,6 +37,7 @@ namespace UnityEngine.Tilemaps
             EditorGUI.BeginChangeCheck();
             tile.DefaultSprite = (Sprite)EditorGUILayout.ObjectField("Sprite", tile.DefaultSprite, typeof(Sprite), false, null);
             tile.DefaultGameObject = (GameObject)EditorGUILayout.ObjectField("GameObject", tile.DefaultGameObject, typeof(GameObject), false, null);
+            tile.group = EditorGUILayout.TextField("Group", tile.group);
             tile.DefaultColliderType = (Tile.ColliderType)EditorGUILayout.EnumPopup("Default Collider", tile.DefaultColliderType);
             tile.moveCost = EditorGUILayout.FloatField("Movement cost", tile.moveCost);
 

@@ -10,6 +10,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public string source = "Inventory";
     public int index;
+    public Sprite DefaultSprite;
 
     private Vector3 originalPosition;
     private Transform originalParent;
@@ -77,7 +78,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     {
         transform.SetParent(originalParent);
         transform.SetAsFirstSibling();
-        gameObject.GetComponent<Image>().raycastTarget = true;
+        //gameObject.GetComponent<Image>().raycastTarget = true;
         transform.position = originalPosition;
     }
 }
