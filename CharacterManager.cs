@@ -85,6 +85,8 @@ public class CharacterManager : MonoBehaviour
     {
         // Update the active character ...
         activeChar.fieldPos = new Vector2Json(charObject.transform.position.x, charObject.transform.position.y);
+        // Set the dungeonSeed back to zero ( no saving in dungeons, character is sent back to the surface )
+        activeChar.dungeonSeed = 0;
 
         // ... And save the changes to the character config file
         Character[] characters;

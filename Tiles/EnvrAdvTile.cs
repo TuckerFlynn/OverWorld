@@ -19,7 +19,7 @@ namespace UnityEngine.Tilemaps
         [SerializeField]
         public Sprite[] m_Sprites;
         // Allows two different terrain tiles to consider each other as themselves
-        public TileBase sister;
+        public TileBase[] sister;
 
         /// <summary>
         /// This method is called when the tile is refreshed.
@@ -89,7 +89,7 @@ namespace UnityEngine.Tilemaps
             }
             else
             {
-                return (tile != null && (tile == this || tile == sister));
+                return (tile != null && (tile == this || Array.Exists<TileBase>(sister, t => t == tile) ));
             }
 
         }
@@ -222,7 +222,13 @@ namespace UnityEngine.Tilemaps
             tile.DefaultColliderType = (Tile.ColliderType)EditorGUILayout.EnumPopup("Default Collider", tile.DefaultColliderType);
             tile.group = EditorGUILayout.TextField("Group", tile.group);
             tile.moveCost = EditorGUILayout.FloatField("Movement cost", tile.moveCost);
-            tile.sister = (TileBase)EditorGUILayout.ObjectField("Sister Tile", tile.sister, typeof(TileBase), false, null);
+            //tile.sister = (TileBase)EditorGUILayout.ObjectField("Sister Tile", tile.sister, typeof(TileBase), false, null);
+
+            //SerializedProperty sis = serializedObject.FindProperty("sister");
+            //EditorGUILayout.PropertyField(sis, true);
+
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("sister"), true);
+
             tile.m_Sprites[0] = (Sprite)EditorGUILayout.ObjectField("Filled", tile.m_Sprites[0], typeof(Sprite), false, null);
             tile.m_Sprites[1] = (Sprite)EditorGUILayout.ObjectField("Three Sides", tile.m_Sprites[1], typeof(Sprite), false, null);
             tile.m_Sprites[2] = (Sprite)EditorGUILayout.ObjectField("Two Sides and One Corner", tile.m_Sprites[2], typeof(Sprite), false, null);
@@ -239,7 +245,10 @@ namespace UnityEngine.Tilemaps
             tile.m_Sprites[13] = (Sprite)EditorGUILayout.ObjectField("One Corner", tile.m_Sprites[13], typeof(Sprite), false, null);
             tile.m_Sprites[14] = (Sprite)EditorGUILayout.ObjectField("Empty", tile.m_Sprites[14], typeof(Sprite), false, null);
             if (EditorGUI.EndChangeCheck())
+            {
                 EditorUtility.SetDirty(tile);
+                serializedObject.ApplyModifiedProperties();
+            }
 
             EditorGUIUtility.labelWidth = oldLabelWidth;
         }

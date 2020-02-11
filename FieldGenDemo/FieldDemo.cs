@@ -106,7 +106,6 @@ public class FieldDemo : MonoBehaviour
     /// <summary>
     /// Some functions borrowed from WorldGenerator to generate an accurate MapField
     /// </summary>
-
     void DefineBiomes()
     {
         biomeKey.Add(0, "arcticWaste");

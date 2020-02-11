@@ -21,7 +21,7 @@ public class MapManager : MonoBehaviour
     public MapField[] masterMap;
     public Vector2Int worldPos;
     public FieldGenerator fieldGenerator;
-    public IngameMenu ingameMenu;
+    public OverworldMinimap minimap;
 
     CharacterManager charMngr;
     
@@ -29,7 +29,7 @@ public class MapManager : MonoBehaviour
     {
         if (mapManager == null)
         {
-            DontDestroyOnLoad(gameObject);
+            //DontDestroyOnLoad(gameObject);
             mapManager = this;
         }
         else if (mapManager != this)
@@ -58,7 +58,7 @@ public class MapManager : MonoBehaviour
         {
             Directory.CreateDirectory(Application.persistentDataPath + "/Fields");
         }
-        ingameMenu = GameObject.Find("MenuScripts").GetComponent<IngameMenu>();
+        minimap = FindObjectOfType<OverworldMinimap>();
         LoadField(worldPos);
     }
     // Load a field from file or generate a new one
@@ -95,7 +95,7 @@ public class MapManager : MonoBehaviour
         }
 
         // Update minimap display
-        ingameMenu.UpdateMinimap(worldPos);
+        minimap.UpdateMinimap(worldPos);
     }
     // Save a field to file, formatted so that it can be opened by Tiled
     public void SaveFieldFile(Vector2Int pos)

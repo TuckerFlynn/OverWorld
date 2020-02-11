@@ -12,6 +12,7 @@ public static class TilesetLoader
     public static List<ObjTile> PlantTiles = new List<ObjTile>();
     public static List<ObjTile> PropTiles = new List<ObjTile>();
     public static List<EnvrTile> BuildingTiles = new List<EnvrTile>();
+    public static List<EnvrTile> DungeonTiles = new List<EnvrTile>();
 
     private static TilesetJson tileset;
     private static Sprite[] spriteSheet;
@@ -35,10 +36,13 @@ public static class TilesetLoader
                 LoadPropTiles();
             if (tileset.name == "buildings")
                 LoadBuildingTiles();
+            if (tileset.name == "dungeon")
+                LoadDungeonTiles();
 
         }
         Debug.Log("Loaded " + GroundTiles.Count + " environment tiles and " + PlantTiles.Count + " plant tiles");
         Debug.Log("Loaded " + PropTiles.Count + " prop tiles and " + BuildingTiles.Count + " building tiles");
+        Debug.Log("Loaded " + DungeonTiles.Count + " dungeon tiles.");
     }
 
     // Loads the Ground tileset as envrTiles or envrAdvTiles
@@ -222,6 +226,69 @@ public static class TilesetLoader
                     }
                 }
                 BuildingTiles.Add(toAdd);
+            }
+        }
+    }
+    // Load the dungeon tileset
+    static void LoadDungeonTiles()
+    {
+        for (int t = 0; t < spriteSheet.Length; t++)
+        {
+            // Loop through tiles, checking the tile's type to know how to create it
+            JsonTile jsonTile = tileset.tiles[t];
+            if (jsonTile.type == "envrTile")
+            {
+                // Tile asset to build
+                EnvrTile toAdd = ScriptableObject.CreateInstance<EnvrTile>();
+                toAdd.DefaultSprite = spriteSheet[t];
+                // Loop through properties on tile
+                for (int p = 0; p < jsonTile.properties.Length; p++)
+                {
+                    JsonTileProperty jsonProperty = jsonTile.properties[p];
+                    if (jsonProperty.name == "moveCost") toAdd.moveCost = float.Parse(jsonProperty.value);
+                    if (jsonProperty.name == "colliderType") toAdd.DefaultColliderType = (UnityEngine.Tilemaps.Tile.ColliderType)int.Parse(jsonProperty.value);
+                    if (jsonProperty.name == "group")
+                        toAdd.group = jsonProperty.value;
+                }
+                DungeonTiles.Add(toAdd);
+            }
+            // NOTE: envrAdvTiles are not built at runtime but loaded from Resources by the name property
+            else if (jsonTile.type == "envrAdvTile")
+            {
+                string name = "";
+                for (int p = 0; p < jsonTile.properties.Length; p++)
+                {
+                    if (jsonTile.properties[p].name == "name")
+                    {
+                        name = jsonTile.properties[p].value;
+                    }
+                }
+                EnvrAdvTile toAdd = Resources.Load<EnvrAdvTile>("Tilesets/Ground/" + name) as EnvrAdvTile;
+                int adj;
+                switch (name)
+                {
+                    case "dungeonWall1":
+                        adj = 0;
+                        break;
+                    case "dungeonWall2":
+                        adj = 12;
+                        break;
+                    case "dungeonWall3":
+                        adj = 24;
+                        break;
+                    case "dungeonWall4":
+                        adj = 36;
+                        break;
+                    default:
+                        adj = 0;
+                        break;
+                }
+                toAdd.sister = new TileBase[] {
+                    DungeonTiles[0 + adj], DungeonTiles[1 + adj], DungeonTiles[2 + adj], DungeonTiles[3 + adj], DungeonTiles[4 + adj],
+                    DungeonTiles[6 + adj], DungeonTiles[7 + adj], DungeonTiles[8 + adj], DungeonTiles[9 + adj], DungeonTiles[10 + adj]
+                };
+
+                DungeonTiles.Add(toAdd);
             }
         }
     }
