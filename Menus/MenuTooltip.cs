@@ -19,7 +19,7 @@ public class MenuTooltip : MonoBehaviour
         eventSystem = EventSystem.current;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         // Set the tooltip position and text when the mouse is over an image with the InvenTooltip script attached
         tooltip.SetActive(false);

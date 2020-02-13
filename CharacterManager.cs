@@ -68,16 +68,13 @@ public class CharacterManager : MonoBehaviour
     public void UpdateCharacter()
     {
         SpriteRenderer[] rends = charObject.GetComponentsInChildren<SpriteRenderer>();
-        if (rends.Length == 7)
-        {
-            rends[0].sprite = bodySprites[activeChar.bodyIndex];
-            rends[1].sprite = itemDB.GetItem(activeChar.equipment[0]).Sprite; // legs
-            rends[2].sprite = itemDB.GetItem(activeChar.equipment[1]).Sprite; // chest
-            rends[3].sprite = hairSprites[activeChar.hairIndex];
-            rends[4].sprite = itemDB.GetItem(activeChar.equipment[2]).Sprite; // head
-            rends[5].sprite = itemDB.GetItem(activeChar.equipment[3]).Sprite; // mainhand
-            rends[6].sprite = itemDB.GetItem(activeChar.equipment[4]).Sprite; // offhand
-        }
+        rends[1].sprite = bodySprites[activeChar.bodyIndex];
+        rends[2].sprite = itemDB.GetItem(activeChar.equipment[0]).Sprite; // legs
+        rends[3].sprite = itemDB.GetItem(activeChar.equipment[1]).Sprite; // chest
+        rends[4].sprite = hairSprites[activeChar.hairIndex];
+        rends[5].sprite = itemDB.GetItem(activeChar.equipment[2]).Sprite; // head
+        rends[6].sprite = itemDB.GetItem(activeChar.equipment[3]).Sprite; // mainhand
+        rends[7].sprite = itemDB.GetItem(activeChar.equipment[4]).Sprite; // offhand
         charObject.SetActive(true);
     }
 

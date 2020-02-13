@@ -17,23 +17,35 @@ public class IngameMenu : MonoBehaviour
     Texture2D minimapTex;
     public int zoom = 10;
     // GUI objects and related values
-    [Header("GUI")]
+    [Header("UI")]
+    public GameObject UI;
     public GameObject inventory;
+    public GameObject crafting;
+    public InputField craftSearch;
+    public GameObject skills;
     public GameObject logger;
+    [Header("Tabs")]
+    public GameObject tabs;
+    public Toggle invenTab;
+    public Toggle craftTab;
+    public Toggle skillsTab;
 
-    private void Start()
+    private void Awake()
     {
         escapeMenu.SetActive(false);
         settingsMenu.SetActive(false);
         HUD.SetActive(true);
         inventory.SetActive(false);
+        crafting.SetActive(false);
+        skills.SetActive(false);
+        tabs.SetActive(false);
 
         logger = GameObject.Find("Logger");
     }
 
     void Update()
     {
-        // Prevents normal key actions while the looger input field is active
+        // Prevents normal key actions while the logger input field is active
         if (logger != null)
         {
             if (logger.GetComponentInChildren<InputField>().enabled)
@@ -41,17 +53,25 @@ public class IngameMenu : MonoBehaviour
                 return;
             }
         }
+        // And prevent key actions when the crafting search bar is focused
+        if (craftSearch.isFocused)
+        {
+            return;
+        }
         
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (inventory.activeSelf)
+            if (inventory.activeSelf || crafting.activeSelf || skills.activeSelf)
             {
                 inventory.SetActive(false);
+                crafting.SetActive(false);
+                skills.SetActive(false);
+                tabs.SetActive(false);
             }
             else
             {
                 escapeMenu.SetActive(!escapeMenu.activeSelf);
-                if (System.Math.Abs(Time.timeScale) > float.Epsilon)
+                if (escapeMenu.activeSelf || settingsMenu.activeSelf)
                     Time.timeScale = 0;
                 else
                     Time.timeScale = 1;
@@ -61,10 +81,88 @@ public class IngameMenu : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.I))
         {
             inventory.SetActive(!inventory.activeSelf);
+            // Disable other UI windows
+            if (crafting.activeSelf || skills.activeSelf)
+            {
+                crafting.SetActive(false);
+                skills.SetActive(false);
+            }
+            if (!inventory.activeSelf && !crafting.activeSelf && !skills.activeSelf)
+            {
+                tabs.SetActive(false);
+            }
+            else
+            {
+                tabs.SetActive(true);
+                invenTab.isOn = true;
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            crafting.SetActive(!crafting.activeSelf);
+            // Disable other UI windows
+            if (inventory.activeSelf || skills.activeSelf)
+            {
+                inventory.SetActive(false);
+                skills.SetActive(false);
+            }
+            if (!inventory.activeSelf && !crafting.activeSelf && !skills.activeSelf)
+            {
+                tabs.SetActive(false);
+            }
+            else
+            {
+                tabs.SetActive(true);
+                craftTab.isOn = true;
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            skills.SetActive(!skills.activeSelf);
+            // Disable other UI windows
+            if (inventory.activeSelf || crafting.activeSelf)
+            {
+                inventory.SetActive(false);
+                crafting.SetActive(false);
+            }
+            if (!inventory.activeSelf && !crafting.activeSelf && !skills.activeSelf)
+            {
+                tabs.SetActive(false);
+            }
+            else
+            {
+                tabs.SetActive(true);
+                skillsTab.isOn = true;
+            }
         }
     }
 
-    public void QuitToMain(Camera main)
+    public void InventoryToggle ()
+    {
+        bool active = invenTab.isOn;
+        inventory.SetActive(active);
+        crafting.SetActive(false);
+        skills.SetActive(false);
+    }
+
+    public void CraftingToggle()
+    {
+        bool active = craftTab.isOn;
+        crafting.SetActive(active);
+        inventory.SetActive(false);
+        skills.SetActive(false);
+    }
+
+    public void SkillsToggle()
+    {
+        bool active = skillsTab.isOn;
+        skills.SetActive(active);
+        inventory.SetActive(false);
+        crafting.SetActive(false);
+    }
+
+    // Return to the main menu
+    public void QuitToMain()
     {
         foreach(GameObject obj in disableOnQuit)
         {

@@ -163,6 +163,7 @@ public class InventoryManager : MonoBehaviour
         // Update activeChar inventories and character sprites (non-UI)
         charMngr.activeChar.inventory = ToBasicInven(Inventory);
         charMngr.activeChar.equipment = ToIntArray(Equipment);
+
         charMngr.UpdateCharacter();
     }
     // Refresh the character preview by checking the currently active equipment
@@ -395,7 +396,45 @@ public class InventoryManager : MonoBehaviour
         if (refreshUI) RefreshInvenUI();
         return success;
     }
-
+    // Remove items from inventory without dropping the object (ie. when selling or crafting)
+    public bool RemoveFromInventory(int id, int quantity, bool refreshUI = true)
+    {
+        bool success = false;
+        Item item = itemDB.GetItem(id);
+        // Check if the amount to remove is more than a single stack, if so loop enough times to remove the max amount of stacks required
+        int stacks = Mathf.CeilToInt(quantity * 1.0f / item.Stack);
+        int toRemove = quantity;
+        for (int s = 0; s < stacks; s++)
+        {
+            for (int i = Inventory.Length - 1; i >= 0; i--)
+            {
+                if (Inventory[i].Item.ID == id)
+                {
+                    if (Inventory[i].Quantity > toRemove)
+                    {
+                        Inventory[i].Quantity -= toRemove;
+                        success = true;
+                        break;
+                    }
+                    else if (Inventory[i].Quantity == toRemove)
+                    {
+                        Inventory[i] = new InvenItem();
+                        success = true;
+                        break;
+                    }
+                    else
+                    {
+                        toRemove -= Inventory[i].Quantity;
+                        Inventory[i] = new InvenItem();
+                    }
+                }
+            }
+        }
+        // Refresh the UI
+        if (refreshUI) RefreshInvenUI();
+        return success;
+    }
+    // Drop an item from a inventory index slot
     public void DropItem(int index, string source, int amount, bool refreshUI = true)
     {
         GameObject obj = Instantiate(itemPrefab);
@@ -419,6 +458,22 @@ public class InventoryManager : MonoBehaviour
         }
 
         if (refreshUI) RefreshInvenUI();
+    }
+
+    public bool HaveItems(int id, int quantity)
+    {
+        bool success = false;
+        int count = 0;
+        for (int i = 0; i < Inventory.Length; i++)
+        {
+            if (Inventory[i].Item.ID == id)
+            {
+                count += Inventory[i].Quantity;
+            }
+        }
+        if (count >= quantity)
+            success = true;
+        return success;
     }
 
     // Get a field from this class by string, ie. InvenItem[] inven = invenMngr.GetInvenByString<InvenItem[]>("Inventory");

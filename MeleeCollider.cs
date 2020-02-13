@@ -39,6 +39,8 @@ public class MeleeCollider : MonoBehaviour
 
     void RotateToMouse()
     {
+        if (Camera.main == null)
+            return;
         Vector3 mousePos = Input.mousePosition;
         mousePos.z = Camera.main.transform.position.z;
 
