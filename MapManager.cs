@@ -11,7 +11,9 @@ public class MapManager : MonoBehaviour
 
     public int worldSize;
     [Header("Tilemaps")]
+    public Tilemap Sub;
     public Tilemap Ground;
+    public Tilemap Walls;
     public Tilemap Roof;
     public Tilemap Objects;
     [Header("Area Objects")]
@@ -29,7 +31,6 @@ public class MapManager : MonoBehaviour
     {
         if (mapManager == null)
         {
-            //DontDestroyOnLoad(gameObject);
             mapManager = this;
         }
         else if (mapManager != this)
@@ -52,8 +53,6 @@ public class MapManager : MonoBehaviour
             // ** this will be changed to force new players to load in a grassland biome with starter prefab
             worldPos = new Vector2Int(Mathf.FloorToInt(Random.value * worldSize), Mathf.FloorToInt(Random.value * worldSize));
         }
-        // Build and load all tilesets from the JSON files
-        TilesetLoader.LoadTiles();
         if (!Directory.Exists(Application.persistentDataPath + "/Fields"))
         {
             Directory.CreateDirectory(Application.persistentDataPath + "/Fields");
@@ -61,6 +60,16 @@ public class MapManager : MonoBehaviour
         minimap = FindObjectOfType<OverworldMinimap>();
         LoadField(worldPos);
     }
+
+    private void OnDisable()
+    {
+        // Only save fields on disable if the player is not in a dungeon
+        if (charMngr != null && !charMngr.InDungeon)
+        {
+            SaveFieldFile(worldPos);
+        }
+    }
+
     // Load a field from file or generate a new one
     public void LoadField (Vector2Int pos)
     {
@@ -73,7 +82,10 @@ public class MapManager : MonoBehaviour
         worldPos = pos;
         charMngr.activeChar.worldPos = new Vector2IntJson(worldPos);
 
-        // Clear all children of the Areas gameobject
+        // Clear tiles and all children of the Areas gameobject
+        Ground.ClearAllTiles();
+        Sub.ClearAllTiles();
+        Walls.ClearAllTiles();
         List<GameObject> children = new List<GameObject>();
         foreach (Transform child in Areas.transform) children.Add(child.gameObject);
         children.ForEach(child => Destroy(child));
@@ -227,6 +239,10 @@ public class MapManager : MonoBehaviour
         Ground.SetTiles(positions, groundArray);
         Roof.SetTiles(positions, roofArray);
         Objects.SetTiles(positions, objectsArray);
+        // Check for gameobjects with scripts that need to be manually started (ie. MineEntrance)
+        MineEntrance[] mineEntrances = Objects.gameObject.GetComponentsInChildren<MineEntrance>();
+        foreach (MineEntrance script in mineEntrances)
+            script.SelfStart();
 
         // AREA LAYER: must be run after the tilemaps have been set because generated areas need to read the tiles underneath depending on their type
         TiledLayer areaLayer = tiled.layers[3];

@@ -21,7 +21,8 @@ public class Character
     // note: fieldPos is used as transform position, doesn't need to be int
     public Vector2Json fieldPos = new Vector2Json( new Vector2(32,32) );
 
-    public int dungeonSeed;
+    public int level;
+    public int experience;
 
     public Character()
     {

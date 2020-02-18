@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Newtonsoft.Json;
+using Inventory;
 
 public class CharacterMenu : MonoBehaviour
 {

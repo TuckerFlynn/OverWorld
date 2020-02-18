@@ -22,43 +22,47 @@ public class PlayerControl : MonoBehaviour
     {
         float horiIn = Input.GetAxis("Horizontal");
         float vertIn = Input.GetAxis("Vertical");
-        // Check if the player has just started moving or is still moving from last frame
-        if ((int)horiIn != 0 || (int)vertIn != 0)
+        // Don't try loading fields if the player is in a dungeon
+        if (!charMngr.InDungeon)
         {
-            if (!inputUse && MapManager.mapManager != null)
+            // Check if the player has just started moving or is still moving from last frame
+            if ((int)horiIn != 0 || (int)vertIn != 0)
             {
-                Vector2Int charWorldPos = new Vector2Int( charMngr.activeChar.worldPos.x, charMngr.activeChar.worldPos.y);
-                // Check if the player is near an edge, and is trying to move out of the field
-                if (transform.position.x < 1.0f && horiIn < 0.0f)
+                if (!inputUse && MapManager.mapManager != null)
                 {
-                    transform.position = new Vector3(63.5f, transform.position.y);
-                    MapManager.mapManager.SaveFieldFile(charWorldPos);
-                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.left);
+                    Vector2Int charWorldPos = new Vector2Int(charMngr.activeChar.worldPos.x, charMngr.activeChar.worldPos.y);
+                    // Check if the player is near an edge, and is trying to move out of the field
+                    if (transform.position.x < 1.0f && horiIn < 0.0f)
+                    {
+                        transform.position = new Vector3(63.5f, transform.position.y);
+                        MapManager.mapManager.SaveFieldFile(charWorldPos);
+                        MapManager.mapManager.LoadField(charWorldPos + Vector2Int.left);
+                    }
+                    else if (transform.position.x > 63.0f && horiIn > 0.0f)
+                    {
+                        transform.position = new Vector3(0.5f, transform.position.y);
+                        MapManager.mapManager.SaveFieldFile(charWorldPos);
+                        MapManager.mapManager.LoadField(charWorldPos + Vector2Int.right);
+                    }
+                    else if (transform.position.y < 0.5f && vertIn < 0.0f)
+                    {
+                        transform.position = new Vector3(transform.position.x, 63.0f);
+                        MapManager.mapManager.SaveFieldFile(charWorldPos);
+                        MapManager.mapManager.LoadField(charWorldPos + Vector2Int.down);
+                    }
+                    else if (transform.position.y > 62.5f && vertIn > 0.0f)
+                    {
+                        transform.position = new Vector3(transform.position.x, 0.0f);
+                        MapManager.mapManager.SaveFieldFile(charWorldPos);
+                        MapManager.mapManager.LoadField(charWorldPos + Vector2Int.up);
+                    }
+                    inputUse = true;
                 }
-                else if (transform.position.x > 63.0f && horiIn > 0.0f)
-                {
-                    transform.position = new Vector3(0.5f, transform.position.y);
-                    MapManager.mapManager.SaveFieldFile(charWorldPos);
-                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.right);
-                }
-                else if (transform.position.y < 0.5f && vertIn < 0.0f)
-                {
-                    transform.position = new Vector3(transform.position.x, 63.0f);
-                    MapManager.mapManager.SaveFieldFile(charWorldPos);
-                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.down);
-                }
-                else if (transform.position.y > 62.5f && vertIn > 0.0f)
-                {
-                    transform.position = new Vector3(transform.position.x, 0.0f);
-                    MapManager.mapManager.SaveFieldFile(charWorldPos);
-                    MapManager.mapManager.LoadField(charWorldPos + Vector2Int.up);
-                }
-                inputUse = true;
             }
-        }
-        if ((int)horiIn == 0 && (int)vertIn == 0)
-        {
-            inputUse = false;
+            if ((int)horiIn == 0 && (int)vertIn == 0)
+            {
+                inputUse = false;
+            }
         }
 
         // Move character based on input

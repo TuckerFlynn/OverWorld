@@ -15,6 +15,8 @@ public class CharacterManager : MonoBehaviour
 
     ItemsDatabase itemDB;
     public GameObject charObject;
+    public Vector3 surfacePos;
+    public bool InDungeon;
 
     public Sprite[] bodySprites;
     public Sprite[] hairSprites;
@@ -45,6 +47,7 @@ public class CharacterManager : MonoBehaviour
 
     private void OnDisable()
     {
+        ExitDungeon();
         SaveCharacter();
     }
     // Used to ensure that some character has been loaded as activeChar
@@ -82,8 +85,6 @@ public class CharacterManager : MonoBehaviour
     {
         // Update the active character ...
         activeChar.fieldPos = new Vector2Json(charObject.transform.position.x, charObject.transform.position.y);
-        // Set the dungeonSeed back to zero ( no saving in dungeons, character is sent back to the surface )
-        activeChar.dungeonSeed = 0;
 
         // ... And save the changes to the character config file
         Character[] characters;
@@ -104,6 +105,21 @@ public class CharacterManager : MonoBehaviour
                     return;
                 }
             }
+        }
+    }
+
+    public void EnterDungeon()
+    {
+        InDungeon = true;
+        surfacePos = charObject.transform.position;
+    }
+
+    public void ExitDungeon()
+    {
+        if (InDungeon)
+        {
+            InDungeon = false;
+            charObject.transform.position = surfacePos;
         }
     }
 }

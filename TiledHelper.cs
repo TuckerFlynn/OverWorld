@@ -12,7 +12,7 @@ public static class TiledHelper
     {
         // Create a generic TiledMap object to convert to JSON
         TiledMap tiled = new TiledMap();
-        // Define layers
+        // DEFINE LAYERS
         tiled.layers[0] = new TiledTileLayer() // Ground
         {
             name = "Ground"
@@ -29,7 +29,7 @@ public static class TiledHelper
         {
             name = "Areas"
         };
-        // Define tilesets
+        // DEFINE TILESETS
         tiled.tilesets[0] = new TiledTileset
         {
             firstgid = 1,
@@ -49,6 +49,16 @@ public static class TiledHelper
         {
             firstgid = 181,
             source = "../Constructors/buildingsTileset.json"
+        };
+        tiled.tilesets[4] = new TiledTileset
+        {
+            firstgid = 277,
+            source = "../Constructors/dungeonTileset.json"
+        };
+        tiled.tilesets[5] = new TiledTileset
+        {
+            firstgid = 337,
+            source = "../Constructors/dungeonPropsTileset.json"
         };
         return tiled;
     }
@@ -159,7 +169,7 @@ public class TiledMap
     public string renderorder = "left-down";
     public string tiledversion = "1.3.1";
     public int tileheight = 16;
-    public TiledTileset[] tilesets = new TiledTileset[4];
+    public TiledTileset[] tilesets = new TiledTileset[6];
     public int tilewidth = 16;
     public string type = "map";
     public double version = 1.2;

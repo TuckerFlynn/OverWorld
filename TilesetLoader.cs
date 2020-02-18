@@ -8,11 +8,14 @@ using UnityEditor;
 
 public static class TilesetLoader
 {
+    public static bool Loaded = false;
+
     public static List<EnvrTile> GroundTiles = new List<EnvrTile>();
     public static List<ObjTile> PlantTiles = new List<ObjTile>();
     public static List<ObjTile> PropTiles = new List<ObjTile>();
     public static List<EnvrTile> BuildingTiles = new List<EnvrTile>();
     public static List<EnvrTile> DungeonTiles = new List<EnvrTile>();
+    public static List<ObjTile> DungeonPropTiles = new List<ObjTile>();
 
     private static TilesetJson tileset;
     private static Sprite[] spriteSheet;
@@ -38,11 +41,14 @@ public static class TilesetLoader
                 LoadBuildingTiles();
             if (tileset.name == "dungeon")
                 LoadDungeonTiles();
+            if (tileset.name == "dungeonProps")
+                LoadDungeonPropTiles();
 
         }
         Debug.Log("Loaded " + GroundTiles.Count + " environment tiles and " + PlantTiles.Count + " plant tiles");
         Debug.Log("Loaded " + PropTiles.Count + " prop tiles and " + BuildingTiles.Count + " building tiles");
-        Debug.Log("Loaded " + DungeonTiles.Count + " dungeon tiles.");
+        Debug.Log("Loaded " + DungeonTiles.Count + " dungeon tiles and " + DungeonPropTiles.Count + " dungeon prop tiles");
+        Loaded = true;
     }
 
     // Loads the Ground tileset as envrTiles or envrAdvTiles
@@ -291,6 +297,66 @@ public static class TilesetLoader
                 DungeonTiles.Add(toAdd);
             }
         }
+    }
+    // Load the dungeon prop tileset
+    static void LoadDungeonPropTiles()
+    {
+        for (int t = 0; t < spriteSheet.Length; t++)
+        {
+            // Prop tiles, also built as ObjTiles
+            JsonTile jsonTile = tileset.tiles[t];
+            if (jsonTile.type == "objTile")
+            {
+                ObjTile toAdd = ScriptableObject.CreateInstance<ObjTile>();
+                toAdd.DefaultSprite = spriteSheet[t];
+
+                // Name property is used in conjunction with the gameobject property to assign specific non-unique gameobjects, so it has to be found outside the loop of properties
+                JsonTileProperty name = Array.Find(jsonTile.properties, p => p.name == "name");
+
+                // Loop through properties on tile
+                for (int p = 0; p < jsonTile.properties.Length; p++)
+                {
+                    JsonTileProperty jsonProperty = jsonTile.properties[p];
+                    // Set the collider type as none, sprite, or grid
+                    if (jsonProperty.name == "colliderType")
+                    {
+                        toAdd.DefaultColliderType = (UnityEngine.Tilemaps.Tile.ColliderType)int.Parse(jsonProperty.value);
+                    }
+                    // Add gameobjects if the property is set to true
+                    if (jsonProperty.name == "gameobject")
+                    {
+                        bool.TryParse(jsonProperty.value, out bool hasGameObject);
+
+                        if (hasGameObject)
+                        {
+                            if (Resources.Load<GameObject>("Tilesets/Gameobjects/dungeonProps_" + t) != null)
+                            {
+                                toAdd.DefaultGameObject = Resources.Load<GameObject>("Tilesets/Gameobjects/dungeonProps_" + t);
+                            }
+                            else if (name != null && !String.IsNullOrWhiteSpace(name.value))
+                            {
+                                toAdd.DefaultGameObject = Resources.Load<GameObject>("Tilesets/Gameobjects/" + name.value);
+                            }
+                            else
+                            {
+                                toAdd.DefaultGameObject = Resources.Load<GameObject>("Tilesets/Gameobjects/genericSmolObstacle");
+                            }
+                        }
+
+                    }
+                    // Set the tile group
+                    if (jsonProperty.name == "group")
+                        toAdd.group = jsonProperty.value;
+                }
+                DungeonPropTiles.Add(toAdd);
+            }
+        }
+    }
+
+    // Get a field from this class by string, ie. InvenItem[] inven = invenMngr.GetInvenByString<InvenItem[]>("Inventory");
+    public static T GetTilesetByString<T>(string set)
+    {
+        return (T)typeof(TilesetLoader).GetField(set).GetValue(null);
     }
 }
 

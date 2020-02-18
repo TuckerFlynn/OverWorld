@@ -23,6 +23,7 @@ public class IngameMenu : MonoBehaviour
     public GameObject crafting;
     public InputField craftSearch;
     public GameObject skills;
+    public GameObject mineEntranceUI;
     public GameObject logger;
     [Header("Tabs")]
     public GameObject tabs;
@@ -32,14 +33,8 @@ public class IngameMenu : MonoBehaviour
 
     private void Awake()
     {
-        escapeMenu.SetActive(false);
-        settingsMenu.SetActive(false);
         HUD.SetActive(true);
-        inventory.SetActive(false);
-        crafting.SetActive(false);
-        skills.SetActive(false);
-        tabs.SetActive(false);
-
+        HideAllUI();
         logger = GameObject.Find("Logger");
     }
 
@@ -61,12 +56,13 @@ public class IngameMenu : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (inventory.activeSelf || crafting.activeSelf || skills.activeSelf)
+            if (inventory.activeSelf || crafting.activeSelf || skills.activeSelf || mineEntranceUI.activeSelf)
             {
                 inventory.SetActive(false);
                 crafting.SetActive(false);
                 skills.SetActive(false);
                 tabs.SetActive(false);
+                mineEntranceUI.SetActive(false);
             }
             else
             {
@@ -164,7 +160,8 @@ public class IngameMenu : MonoBehaviour
     // Return to the main menu
     public void QuitToMain()
     {
-        foreach(GameObject obj in disableOnQuit)
+        Time.timeScale = 1;
+        foreach (GameObject obj in disableOnQuit)
         {
             obj.SetActive(false);
         }
@@ -191,5 +188,16 @@ public class IngameMenu : MonoBehaviour
         {
             text.color = new Color(text.color.r, text.color.g, text.color.b, slider.value);
         }
+    }
+
+    public void HideAllUI()
+    {
+        escapeMenu.SetActive(false);
+        settingsMenu.SetActive(false);
+        inventory.SetActive(false);
+        crafting.SetActive(false);
+        skills.SetActive(false);
+        tabs.SetActive(false);
+        mineEntranceUI.SetActive(false);
     }
 }

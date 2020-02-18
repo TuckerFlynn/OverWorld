@@ -6,6 +6,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using Inventory;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -26,6 +27,7 @@ public class InventoryManager : MonoBehaviour
     public GameObject invenPanelHolder;
     private GameObject[] invenPanels;
     public GameObject tooltip;
+    public GameObject rightClickMenu;
     public Image[] equipImages;
     public Image[] characterImages;
     [Header("Dropped item prefab")]
@@ -57,6 +59,22 @@ public class InventoryManager : MonoBehaviour
         List<RaycastResult> results = new List<RaycastResult>();
         raycaster.Raycast(pointerEventData, results);
 
+        // Open the right click menu
+        if (Input.GetMouseButtonDown(1))
+        {
+            foreach (RaycastResult result in results)
+            {
+                if (result.gameObject.TryGetComponent<InvenTooltip>(out InvenTooltip tooltipScript))
+                {
+                    rightClickMenu.SetActive(true);
+                    rightClickMenu.transform.position = result.gameObject.transform.position + new Vector3(40.0f, -40.0f);
+                    RightClickMenu script = rightClickMenu.GetComponent<RightClickMenu>();
+                    script.source = tooltipScript.panel;
+                    script.index = tooltipScript.index;
+                }
+            }
+        }
+
         foreach (RaycastResult result in results)
         {
             bool noMouse = !Input.GetMouseButton(0) && !Input.GetMouseButton(1) && !Input.GetMouseButton(2);
@@ -87,6 +105,15 @@ public class InventoryManager : MonoBehaviour
                     builder.Append(Inventory[tooltipScript.index].Item.Title);
                     builder.Append("</color></size>").AppendLine();
                     builder.Append(Inventory[tooltipScript.index].Item.Description);
+
+                    if (Inventory[tooltipScript.index].Item is Building building)
+                    {
+                        builder.AppendLine();
+                        builder.Append("<size=6><color='green'>");
+                        builder.Append("Building durability: ").Append(building.Durability);
+                        builder.Append("</color></size>");
+                    }
+
                     tooltip.GetComponentInChildren<Text>().text = builder.ToString();
                 }
             }
@@ -396,7 +423,7 @@ public class InventoryManager : MonoBehaviour
         if (refreshUI) RefreshInvenUI();
         return success;
     }
-    // Remove items from inventory without dropping the object (ie. when selling or crafting)
+    // Remove items from inventory without dropping the object (ie. when selling or crafting); starts removing from the last inventory slot
     public bool RemoveFromInventory(int id, int quantity, bool refreshUI = true)
     {
         bool success = false;
@@ -430,6 +457,26 @@ public class InventoryManager : MonoBehaviour
                 }
             }
         }
+        // Refresh the UI
+        if (refreshUI) RefreshInvenUI();
+        return success;
+    }
+    // Remove items w/o dropping; overload to remove one item from a specific inventory slot
+    public bool RemoveFromInventory(string source, int index, bool refreshUI = true)
+    {
+        bool success = false;
+        InvenItem[] inven = GetInvenByString<InvenItem[]>(source);
+
+        if (inven[index].Quantity > 0)
+        {
+            inven[index].Quantity -= 1;
+            if (inven[index].Quantity == 0)
+            {
+                inven[index].Item = new Item();
+            }
+            success = true;
+        }
+
         // Refresh the UI
         if (refreshUI) RefreshInvenUI();
         return success;

@@ -9,20 +9,26 @@ public class DungeonGenerator : MonoBehaviour
     public Tilemap Sub;
     public Tilemap Ground;
     public Tilemap Wall;
+    public Tilemap Roof;
     public Tilemap Objects;
     public GameObject Areas;
 
     public int mapSize = 64;
-    [Header("Walker Input")]
-    public int minSteps = 500;
-    public int maxSteps = 2000;
-    public int minBranches = 1;
-    public int maxBranches = 4;
-    public bool OneOrigin = true;
 
+    XXHash hash;
+    [Header("Dungeon Gen Seed")]
+    public int hashSeed;
+    [Header("Walker Input")]
+    public int minSteps = 200;
+    public int maxSteps = 1000;
+    public int minBranches = 1;
+    public int maxBranches = 6;
+    public bool OneOrigin = true;
+    
     int[,] Map;
     Vector3Int[] positions;
-    TileBase[] tileArray;
+    Vector3Int stairUp;
+    Vector3Int stairDown;
 
     private void Start()
     {
@@ -34,27 +40,34 @@ public class DungeonGenerator : MonoBehaviour
         Map = new int[mapSize, mapSize];
     }
 
-    public void MainDungeonGen()
+    public Vector3Int MainDungeonGen(int seed)
     {
-        Ground.ClearAllTiles();
-        Wall.ClearAllTiles();
-        Objects.ClearAllTiles();
-    }
+        int h = 0;
+        hashSeed = seed;
+        hash = new XXHash(hashSeed);
 
-    private void Update ()
-    {
-        int randStep = Random.Range(minSteps, maxSteps);
-        int randBranch = Random.Range(minBranches, maxBranches);
-
-        BasicWalker(randStep, randBranch, OneOrigin);
-        Map = ExpandByOne(Map);
-
-        QualityCheck();
+        // Rerun the walker if the quality check fails
+        do
+        {
+            //int randStep = Random.Range(minSteps, maxSteps);
+            int randStep = hash.Range(minSteps, maxSteps, h);
+            h++;
+            //int randBranch = Random.Range(minBranches, maxBranches);
+            int randBranch = hash.Range(minBranches, maxBranches, h);
+            h++;
+            // Generation methods
+            BasicWalker(randStep, randBranch, OneOrigin);
+            Map = ExpandByOne(Map);
+            Map = BoundaryWalls(Map);
+        }
+        while (!QualityCheck());
 
         Sub.ClearAllTiles();
         Ground.ClearAllTiles();
         Wall.ClearAllTiles();
-
+        Roof.ClearAllTiles();
+        Objects.ClearAllTiles();
+        // Rough ground tiles
         TileBase ground1 = TilesetLoader.DungeonTiles[12];
         TileBase ground2 = TilesetLoader.DungeonTiles[13];
         TileBase ground3 = TilesetLoader.DungeonTiles[14];
@@ -62,27 +75,37 @@ public class DungeonGenerator : MonoBehaviour
         TileBase ground5 = TilesetLoader.DungeonTiles[16];
         TileBase[] groundTiles = { ground1, ground2, ground3, ground4, ground5 };
         PaintByNumber(Ground, groundTiles, 1);
+        // Dark tiles
         TileBase roof1 = TilesetLoader.DungeonTiles[17];
         TileBase roof2 = TilesetLoader.DungeonTiles[23];
         TileBase[] roofTiles = { roof1, roof2 };
         PaintByNumber(Wall, roofTiles, 0);
+        // Boundary tiles, and ground tiles under the boundaries (Sub layer)
         TileBase wall1 = TilesetLoader.DungeonTiles[49];
         TileBase[] wallTiles = { wall1 };
         PaintTheWall(Ground, wallTiles, 0);
         PaintTheWall(Sub, groundTiles, 0);
+
+        // Add up and down stairs
+        TileBase stairUpTile = TilesetLoader.DungeonPropTiles[1];
+        Objects.SetTile(stairUp, stairUpTile);
+        TileBase stairDownTile = TilesetLoader.DungeonTiles[53];
+        Ground.SetTile(stairDown, stairDownTile);
+
+        return stairUp;
     }
 
     void BasicWalker (int steps, int branches, bool singleOrigin)
     {
         Map = new int[mapSize, mapSize];
-        Vector3Int origin = new Vector3Int(1 + Random.Range(0, mapSize - 2), 1 + Random.Range(0, mapSize - 2), 0);
+        stairUp = new Vector3Int(1 + Random.Range(0, mapSize - 2), 1 + Random.Range(0, mapSize - 2), 0);
 
         for (int b = 0; b < branches; b++)
         {
             Vector3Int walkerPos;
-            if (singleOrigin)
+            if (singleOrigin || b == 0)
             {
-                walkerPos = origin;
+                walkerPos = stairUp;
             }
             else
             {
@@ -100,6 +123,11 @@ public class DungeonGenerator : MonoBehaviour
                     break;
 
                 Map[walkerPos.x, walkerPos.y] = 1;
+            }
+            // Add the stairs down at the last step of the last branch
+            if (b == branches - 1)
+            {
+                stairDown = walkerPos;
             }
         }
     }
@@ -214,6 +242,22 @@ public class DungeonGenerator : MonoBehaviour
                     newMap[x, y] = 1;
                 }
             }
+        }
+        return newMap;
+    }
+
+    int[,] BoundaryWalls(int[,] map)
+    {
+        int[,] newMap = map;
+        for (int x = 0; x < mapSize; x++)
+        {
+            newMap[x, 0] = 0;
+            newMap[x, mapSize - 1] = 0;
+        }
+        for (int y = 0; y < mapSize; y++)
+        {
+            newMap[0, y] = 0;
+            newMap[mapSize - 1, y] = 0;
         }
         return newMap;
     }

@@ -182,6 +182,32 @@ public class InGameLog : MonoBehaviour
             globalLight.time = float.Parse(s[1]);
             return;
         }
+        // Move the player to the field at the provided coords
+        if (command.StartsWith("teleport", System.StringComparison.OrdinalIgnoreCase))
+        {
+            if (CharacterManager.characterManager.InDungeon)
+            {
+                Debug.Log("Unable to teleport from inside dungeon.");
+                return;
+            }
+            string[] s = command.Split(' ');
+            if (s.Length < 3 || s.Length > 3)
+            {
+                Debug.Log("Wrong number of parameters for time command");
+                return;
+            }
+            MapManager mapMngr = MapManager.mapManager;
+            if (int.TryParse(s[1], out int x) && int.TryParse(s[2], out int y))
+            {
+                mapMngr.SaveFieldFile(mapMngr.worldPos);
+                mapMngr.LoadField(new Vector2Int(x, y));
+            }
+            else
+            {
+                Debug.Log("Unable to parse coordinates.");
+            }
+            return;
+        }
         Debug.Log("Command unknown or improperly formatted");
     }
 }
