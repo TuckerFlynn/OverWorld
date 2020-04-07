@@ -22,6 +22,7 @@ public class InventoryManager : MonoBehaviour
     /// By index: 0=Legs, 1=Chest, 2=Head, 3=Mainhand, 4=Offhand, 5=Amulet, 6=Backpack
     /// </summary>
     public InvenItem[] Equipment = new InvenItem[7];
+    public InvenSortType invenSortType;
     [Header("Inven UI elements")]
     public GameObject invenCanvas;
     public GameObject invenPanelHolder;
@@ -194,7 +195,7 @@ public class InventoryManager : MonoBehaviour
         charMngr.UpdateCharacter();
     }
     // Refresh the character preview by checking the currently active equipment
-    void UpdateCharPreview()
+    public void UpdateCharPreview()
     {
         // Legs
         if (Equipment[0].Item != null && Equipment[0].Item.ID != 0)
@@ -507,6 +508,24 @@ public class InventoryManager : MonoBehaviour
         if (refreshUI) RefreshInvenUI();
     }
 
+    // Sort the item depending on the current sorting type
+    public void SortInven()
+    {
+        int sortType = invenSortType.sortType;
+
+        if (sortType == 1)
+        {
+            Array.Sort(Inventory);
+        }
+        else
+        {
+            Debug.Log("sorting by type has not been implemented");
+        }
+
+        RefreshInvenUI();
+    }
+
+    // Check if the inventory contains at least the specified amount of an item
     public bool HaveItems(int id, int quantity)
     {
         bool success = false;
@@ -554,7 +573,7 @@ public class InventoryManager : MonoBehaviour
     }
 }
 
-public class InvenItem
+public class InvenItem : IComparable<InvenItem>
 {
     public Item Item { get; set; }
     public int Quantity { get; set; }
@@ -564,9 +583,31 @@ public class InvenItem
         Item = new Item();
         Quantity = 0;
     }
+
+    public int CompareTo(InvenItem other)
+    {
+        if (other == null)
+            return 1;
+
+        if (string.IsNullOrWhiteSpace(this.Item.Title) && !string.IsNullOrWhiteSpace(other.Item.Title))
+        {
+            return 1;
+        }
+        else if (string.IsNullOrWhiteSpace(this.Item.Title) && string.IsNullOrWhiteSpace(other.Item.Title))
+        {
+            return 0;
+        }
+        else if (!string.IsNullOrWhiteSpace(this.Item.Title) && string.IsNullOrWhiteSpace(other.Item.Title))
+        {
+            return -1;
+        }
+
+        return string.Compare(this.Item.Title, other.Item.Title, StringComparison.OrdinalIgnoreCase);
+    }
 }
 /// <summary>
-/// Simplified version of InvenItem that only contains ID and Quantity
+/// Simplified version of InvenItem that only contains ID and Quantity;
+/// *note this will have to be changed once unique items are introduced*
 /// </summary>
 [Serializable]
 public class BasicInvenItem

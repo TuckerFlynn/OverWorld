@@ -91,6 +91,11 @@ public class PlayerControl : MonoBehaviour
                 Destroy(col.gameObject);
             else
                 groundItem.Quantity -= added;
+
+            FloatingText floatTxt = FloatingText.floatingText;
+            string item = ItemsDatabase.itemsDatabase.GetItem(groundItem.ID).Title;
+            string info = string.Format("+{0} {1}", added, item);
+            floatTxt.CreateText(info, rb2D.transform.position, 0.5f);
         }
     }
 }

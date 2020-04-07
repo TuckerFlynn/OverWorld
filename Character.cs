@@ -17,12 +17,21 @@ public class Character
     public int hairIndex;
 
     // Default both positions to outside the map, indicating a new player
-    public Vector2IntJson worldPos = new Vector2IntJson( Vector2Int.one * -1 );
+    public Vector2IntJson worldPos = new Vector2IntJson(-1, -1);
     // note: fieldPos is used as transform position, doesn't need to be int
-    public Vector2Json fieldPos = new Vector2Json( new Vector2(32,32) );
+    public Vector2Json fieldPos = new Vector2Json(32, 32);
+
 
     public int level;
-    public int experience;
+    public float experience;
+
+    public int maxHealth;
+    public float health;
+
+    public float stamina;
+    public float hunger;
+
+    public Dictionary<string, int> Skills = new Dictionary<string, int>();
 
     public Character()
     {
@@ -30,11 +39,19 @@ public class Character
         {
             inventory[i] = new BasicInvenItem();
         }
+        Skills.Add("Strength", 0);
+        Skills.Add("Constitution", 0);
+        Skills.Add("Dexterity", 0);
+        Skills.Add("Intelligence", 0);
+        Skills.Add("Wisdom", 0);
+        Skills.Add("Charisma", 0);
+
+        maxHealth = 100;
+        health = 100;
     }
 }
 /// <summary>
-/// Simplified Vector2Int for serializing to JSON,
-/// does not include magnitude and normalized properties
+/// Simplified Vector2Int for serializing to JSON, does not include magnitude and normalized properties
 /// </summary>
 [Serializable]
 public class Vector2IntJson
@@ -47,10 +64,15 @@ public class Vector2IntJson
         this.x = vect.x;
         this.y = vect.y;
     }
+
+    public Vector2IntJson(int x, int y)
+    {
+        this.x = x;
+        this.y = y;
+    }
 }
 /// <summary>
-/// Simplified Vector2 for serializing to JSON,
-/// does not include magnitude and normalized properties
+/// Simplified Vector2 for serializing to JSON, does not include magnitude and normalized properties
 /// </summary>
 [Serializable]
 public class Vector2Json

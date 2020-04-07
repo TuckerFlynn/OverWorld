@@ -42,17 +42,23 @@ public class RoofArea : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        foreach (Vector3Int pos in positions)
-        {
-            Roof.SetColor(pos, new Color(0, 0, 0, 0.1f));
+        if (collision.TryGetComponent<PlayerControl>(out PlayerControl player))
+        { 
+            foreach (Vector3Int pos in positions)
+            {
+                Roof.SetColor(pos, new Color(0, 0, 0, 0.1f));
+            }
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        foreach (Vector3Int pos in positions)
+        if (collision.gameObject.TryGetComponent<PlayerControl>(out PlayerControl player))
         {
-            Roof.SetColor(pos, Color.white);
+            foreach (Vector3Int pos in positions)
+            {
+                Roof.SetColor(pos, Color.white);
+            }
         }
     }
 }

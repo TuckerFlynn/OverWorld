@@ -44,7 +44,7 @@ public class CraftingManager : MonoBehaviour
     public void RefreshRecipeButtons()
     {
         bool searchFilter = false;
-        if (search.text != "")
+        if (!string.IsNullOrWhiteSpace(search.text))
         {
             searchFilter = true;
         }
@@ -59,8 +59,33 @@ public class CraftingManager : MonoBehaviour
         // Loop through all crafting recipes and add a UI element for each one
         foreach (CraftRecipe craftRecipe in craftingDB.craftRecipes)
         {
+            // Split the search input by seperate words
             string searchStr = search.text.ToLower();
-            if (searchFilter && !craftRecipe.Fuzzy.Contains(searchStr))
+            string[] searchTerms = searchStr.Split(' ');
+            // Loop through each term and check if the recipe title and/or keywords contain all terms
+            bool success = true;
+            bool exact = false;
+            for (int i = 0; i < searchTerms.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(searchTerms[i]))
+                    continue;
+                // If any of the input terms aren't found in the title or fuzzy keywords, the search is not a success
+                if (craftRecipe.Fuzzy.IndexOf(searchTerms[i], System.StringComparison.OrdinalIgnoreCase) < 0
+                    && craftRecipe.Title.IndexOf(searchTerms[i], System.StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    success = false;
+                }
+                // If the search input contains an exact item name, that recipe will be moved to the top of the list
+                if (searchStr.Contains(craftRecipe.Title.ToLower()))
+                {
+                    exact = true;
+                }
+
+                if (!success)
+                    break;
+            }
+            // If there is a search input and a recipe has no matches, don't add a button for it
+            if (searchFilter && !success)
             {
                 continue;
             }
@@ -69,7 +94,15 @@ public class CraftingManager : MonoBehaviour
             prefab.transform.SetParent(ScrollContent.transform, false);
             SetRecipeButton(prefab, craftRecipe);
 
-            ContentButtons.Add(prefab);
+            if (searchFilter && exact)
+            {
+                ContentButtons.Add(prefab);
+                prefab.transform.SetAsFirstSibling();
+            }
+            else
+            {
+                ContentButtons.Add(prefab);
+            }
         }
     }
     // Resets the ScrollContent list and deletes existing recipe buttons
@@ -104,11 +137,13 @@ public class CraftingManager : MonoBehaviour
         }
         if (haveItems)
         {
-            texts[1].text = "Sufficient Resources";
+            images[3].transform.GetChild(0).gameObject.SetActive(true);
+            images[3].transform.GetChild(1).gameObject.SetActive(false);
         }
         else
         {
-            texts[1].text = "Insufficient Resources";
+            images[3].transform.GetChild(0).gameObject.SetActive(false);
+            images[3].transform.GetChild(1).gameObject.SetActive(true);
         }
         // Assign the toggle to the toggle group of all recipes
         Toggle toggle = obj.GetComponent<Toggle>();
@@ -124,6 +159,7 @@ public class CraftingManager : MonoBehaviour
         foreach (GameObject obj in ContentButtons)
         {
             CraftRecipe recipe = obj.GetComponent<RecipeToggle>().recipe;
+            Image[] images = obj.GetComponentsInChildren<Image>();
             Text[] texts = obj.GetComponentsInChildren<Text>();
             // Check if character inventory conatins all the required items
             bool haveItems = true;
@@ -135,13 +171,16 @@ public class CraftingManager : MonoBehaviour
                     break;
                 }
             }
+            // Display checkmark or X to indicate if the player has enough resources to make an item
             if (haveItems)
             {
-                texts[1].text = "Sufficient Resources";
+                images[3].transform.GetChild(0).gameObject.SetActive(true);
+                images[3].transform.GetChild(1).gameObject.SetActive(false);
             }
             else
             {
-                texts[1].text = "Insufficient Resources";
+                images[3].transform.GetChild(0).gameObject.SetActive(false);
+                images[3].transform.GetChild(1).gameObject.SetActive(true);
             }
         }
     }

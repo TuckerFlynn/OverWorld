@@ -141,7 +141,7 @@ namespace Inventory
             this.ID = 0;
             this.Stack = 1;
         }
-        // ToString is automatically called when logging an object, by default it will just give the class name
+        // ToString is automatically called when logging an object, by default it will just give the class name so this makes debugging easier
         public override string ToString()
         {
             return Slug + " (ID: " + ID + ")";
@@ -150,7 +150,7 @@ namespace Inventory
     [Serializable]
     public class Consumable : Item
     {
-        public bool isConsumable { get; set;  }
+        public bool isConsumable { get; set; }
         public List<StatusEffect> Effects = new List<StatusEffect>();
     }
     [Serializable]

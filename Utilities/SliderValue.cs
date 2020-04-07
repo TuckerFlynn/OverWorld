@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class SliderValue : MonoBehaviour {
     public Text text;
     public Slider slider;
+    public int scale = 1;
 
     void Start () {
         ValueToText();
@@ -13,11 +14,13 @@ public class SliderValue : MonoBehaviour {
 
     public void ValueToText () {
         string num;
+
         if (slider.wholeNumbers == false) {
-            num = (Mathf.Round(slider.value * 100)/100).ToString();
+            num = (scale * Mathf.Round(slider.value * 100)/100).ToString();
         } else {
-            num = slider.value.ToString();
+            num = (scale * slider.value).ToString();
         }
+
         text.text = num;
     }
 }

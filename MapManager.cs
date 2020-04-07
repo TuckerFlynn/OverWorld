@@ -19,6 +19,7 @@ public class MapManager : MonoBehaviour
     [Header("Area Objects")]
     public GameObject Areas;
     public GameObject[] AreaObjects;
+    public GameObject GroundItems;
 
     public MapField[] masterMap;
     public Vector2Int worldPos;
@@ -43,7 +44,7 @@ public class MapManager : MonoBehaviour
     {
         // Force character to reload when the mapManager is started
         charMngr = CharacterManager.characterManager;
-        charMngr.LoadCharacter();
+        charMngr.UpdateCharacter();
 
         masterMap = LoadWorld();
         worldSize = (int)Mathf.Sqrt(masterMap.Length);
@@ -89,6 +90,10 @@ public class MapManager : MonoBehaviour
         List<GameObject> children = new List<GameObject>();
         foreach (Transform child in Areas.transform) children.Add(child.gameObject);
         children.ForEach(child => Destroy(child));
+        // Items dropped on the ground are also removed when moving to a new field
+        List<GameObject> drops = new List<GameObject>();
+        foreach (Transform child in GroundItems.transform) drops.Add(child.gameObject);
+        drops.ForEach(drop => Destroy(drop));
 
         // try to load the requested field from file
         string file = worldPos.x + "_" + worldPos.y + ".json";

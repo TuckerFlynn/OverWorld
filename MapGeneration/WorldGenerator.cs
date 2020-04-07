@@ -97,7 +97,7 @@ public class WorldGenerator : MonoBehaviour {
         precipScale = 10.0f * (0.5f + biomeScaleSlider.value);
         tempScale = 20.0f * (0.5f + biomeScaleSlider.value);
 
-        worldSize = Mathf.RoundToInt(worldSizeSlider.value);
+        worldSize = Mathf.RoundToInt(worldSizeSlider.value) * 16;
 
         poleFrac = poleFracSlider.value;
         equatorFrac = equatorFracSlider.value;

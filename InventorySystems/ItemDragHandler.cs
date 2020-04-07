@@ -71,6 +71,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
             Debug.Log("Dropped " + q + " of " + invenMgr.GetInvenByString<InvenItem[]>(source)[index].Item + " on the ground!");
             invenMgr.DropItem(index, source, q);
+            invenMgr.UpdateCharPreview();
         }
     }
 

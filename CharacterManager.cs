@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -22,6 +23,11 @@ public class CharacterManager : MonoBehaviour
     public Sprite[] hairSprites;
 
     public Character activeChar;
+    public HUDBars hudBars;
+
+    // Events that trigger updates to UI elements
+    public event Action OnExperienceGain;
+    public event Action OnLevelUp;
 
     private void Awake()
     {
@@ -38,6 +44,7 @@ public class CharacterManager : MonoBehaviour
         hairSprites = Resources.LoadAll<Sprite>("Sprites/Character/hair");
 
         charObject.SetActive(false);
+        LoadCharacter();
     }
 
     private void Start()
@@ -65,7 +72,6 @@ public class CharacterManager : MonoBehaviour
             }
         }
         charObject.transform.position = new Vector3(activeChar.fieldPos.x, activeChar.fieldPos.y, 0.0f);
-        UpdateCharacter();
     }
     // Refresh character sprites (frequently called from InventoryManager)
     public void UpdateCharacter()
@@ -80,7 +86,7 @@ public class CharacterManager : MonoBehaviour
         rends[7].sprite = itemDB.GetItem(activeChar.equipment[4]).Sprite; // offhand
         charObject.SetActive(true);
     }
-
+    // Overwrite the character save with updated values
     public void SaveCharacter()
     {
         // Update the active character ...
@@ -106,14 +112,38 @@ public class CharacterManager : MonoBehaviour
                 }
             }
         }
+
+
     }
 
+    // Experience is added via public method to check for level-ups
+    public void AddExperience(float exp)
+    {
+        activeChar.experience += exp;
+
+        if (FlynnsGlobalUtilities.ExperienceToLevel(2, activeChar.experience) > activeChar.level)
+        {
+            activeChar.level++;
+            FloatingText floatTxt = FloatingText.floatingText;
+            string info = string.Format("+ Level Up");
+            Vector3 pos = charObject.transform.position + new Vector3(0, -0.1f);
+            floatTxt.CreateText(info, pos, 1.0f);
+
+            if (OnLevelUp != null)
+                OnLevelUp();
+        }
+
+        // Publish the OnExperienceGain event (after potentially leveling up)
+        if (OnExperienceGain != null)
+            OnExperienceGain();
+    }
+
+    // Save the surface position when entering a dungeon, and reset the character position to the saved point when exiting
     public void EnterDungeon()
     {
         InDungeon = true;
         surfacePos = charObject.transform.position;
     }
-
     public void ExitDungeon()
     {
         if (InDungeon)

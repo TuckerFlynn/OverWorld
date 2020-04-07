@@ -11,9 +11,16 @@ public class ResourceDrop : MonoBehaviour
     /// </summary>
     public int resourceType = 0;
 
+    GameObject GroundItems;
     public GameObject itemPrefab;
     public int dropID;
     public int dropQuantity;
+    public float dropExp;
+
+    private void Start()
+    {
+        GroundItems = GameObject.Find("GroundItems");
+    }
 
     public void DamageResource(float dmg)
     {
@@ -26,6 +33,9 @@ public class ResourceDrop : MonoBehaviour
             obj.GetComponent<GroundItem>().ID = dropID;
             obj.GetComponent<GroundItem>().Quantity = dropQuantity;
             obj.transform.position = transform.position;
+            obj.transform.SetParent(GroundItems.transform);
+            // Give small amount of xp for gathering a resource
+            CharacterManager.characterManager.AddExperience(dropExp);
 
             StartCoroutine("DelayedDestroy");
         }
