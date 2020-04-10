@@ -23,6 +23,7 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     public InvenItem[] Equipment = new InvenItem[7];
     public InvenSortType invenSortType;
+
     [Header("Inven UI elements")]
     public GameObject invenCanvas;
     public GameObject invenPanelHolder;
@@ -31,8 +32,12 @@ public class InventoryManager : MonoBehaviour
     public GameObject rightClickMenu;
     public Image[] equipImages;
     public Image[] characterImages;
+
     [Header("Dropped item prefab")]
     public GameObject itemPrefab;
+
+    // Public actions!
+    public event Action OnMainhandChange;
 
     private void Start()
     {
@@ -316,7 +321,7 @@ public class InventoryManager : MonoBehaviour
                     // Move from inventory to occupied equipment space
                     else
                     {
-                        int destID = Equipment[destIndex].Item.ID;
+                        int destItemID = Equipment[destIndex].Item.ID;
                         Equipment[destIndex] = Inventory[sourceIndex];
                         // Decrease inven quantity or remove from inven
                         if (Inventory[sourceIndex].Quantity > 1)
@@ -324,17 +329,19 @@ public class InventoryManager : MonoBehaviour
                         else
                             Inventory[sourceIndex] = new InvenItem();
                         // Add replaced equipment back into inventory
-                        bool addToInven = AddToInventory(destID, false);
-
+                        bool addToInven = AddToInventory(destItemID, false);
 
                         // IF ADDTOINVEN IS FALSE, Inventory IS FULL SO DROP THE ITEM
                         if (!addToInven)
                         {
                             DropItem(destIndex, destStr, GetInvenByString<InvenItem[]>(destStr)[destIndex].Quantity, false);
-                            Debug.Log("Inventory is full, dropping " + itemDB.ItemDatabase[destID]);
+                            Debug.Log("Inventory is full, dropping " + itemDB.ItemDatabase[destItemID]);
                             success = false;
                         }
                     }
+                    // Trigger OnMainhandChange event
+                    if (destIndex == 3 && OnMainhandChange != null)
+                        OnMainhandChange();
                 }
                 else
                 {
@@ -382,6 +389,9 @@ public class InventoryManager : MonoBehaviour
                         Equipment[sourceIndex] = new InvenItem();
                     }
                 }
+                // Trigger OnMainhandChange event
+                if (sourceIndex == 3 && OnMainhandChange != null)
+                    OnMainhandChange();
             }
         }
         RefreshInvenUI();

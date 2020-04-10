@@ -91,6 +91,7 @@ public class CharacterManager : MonoBehaviour
     {
         // Update the active character ...
         activeChar.fieldPos = new Vector2Json(charObject.transform.position.x, charObject.transform.position.y);
+        activeChar.Skills = SkillManager.skillManager.activeSkills;
 
         // ... And save the changes to the character config file
         Character[] characters;
@@ -112,8 +113,6 @@ public class CharacterManager : MonoBehaviour
                 }
             }
         }
-
-
     }
 
     // Experience is added via public method to check for level-ups
@@ -123,14 +122,25 @@ public class CharacterManager : MonoBehaviour
 
         if (FlynnsGlobalUtilities.ExperienceToLevel(2, activeChar.experience) > activeChar.level)
         {
-            activeChar.level++;
+            activeChar.level = FlynnsGlobalUtilities.ExperienceToLevel(2, activeChar.experience);
+            activeChar.skillPoints += 4;
+            SkillManager.skillManager.UpdateSkillPointCount();
             FloatingText floatTxt = FloatingText.floatingText;
-            string info = string.Format("+ Level Up");
+            string info = string.Format("+Level Up!");
             Vector3 pos = charObject.transform.position + new Vector3(0, -0.1f);
             floatTxt.CreateText(info, pos, 1.0f);
 
             if (OnLevelUp != null)
                 OnLevelUp();
+        }
+        // Lowering experience is only possible via commands, but this handles it properly!
+        if (FlynnsGlobalUtilities.ExperienceToLevel(2, activeChar.experience) < activeChar.level)
+        {
+            activeChar.level = FlynnsGlobalUtilities.ExperienceToLevel(2, activeChar.experience);
+            FloatingText floatTxt = FloatingText.floatingText;
+            string info = "Level down? U Suck.";
+            Vector3 pos = charObject.transform.position + new Vector3(0, -0.1f);
+            floatTxt.CreateText(info, pos, 1.0f);
         }
 
         // Publish the OnExperienceGain event (after potentially leveling up)

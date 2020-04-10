@@ -27,4 +27,12 @@ public class ViewportZoom : MonoBehaviour
         vert.value = 0.5f;
         hor.value = 0.5f;
     }
+
+    public void Wiggle()
+    {
+        vert.value += 0.01f;
+        vert.value -= 0.01f;
+        hor.value += 0.01f;
+        hor.value -= 0.01f;
+    }
 }

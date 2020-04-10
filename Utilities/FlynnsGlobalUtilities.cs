@@ -23,7 +23,12 @@ public static class FlynnsGlobalUtilities
         }
         return level;
     }
-    // Get the amount of experience above the previous level, as a value from 0.0 to 1.0
+    /// <summary>
+    /// Get the amount of experience above the previous level, as a value from 0.0 to 1.0
+    /// </summary>
+    /// <param name="scaleType">1: 100xp/level; 2: exponential</param>
+    /// <param name="experience"></param>
+    /// <returns></returns>
     public static float ExperienceToLevelProgress(int scaleType, float experience)
     {
         float progress;

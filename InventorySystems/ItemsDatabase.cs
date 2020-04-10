@@ -32,7 +32,7 @@ public class ItemsDatabase : MonoBehaviour
             // Allows deserializing into multiple classes based on the $type value in the Json file
             TypeNameSerializationBinder binder = new TypeNameSerializationBinder
             {
-                KnownTypes = new List<Type> { typeof(Item), typeof(Consumable), typeof(Building) }
+                KnownTypes = new List<Type> { typeof(Item), typeof(Mainhand), typeof(Consumable), typeof(Building) }
             };
             Item[] items = JsonConvert.DeserializeObject<Item[]>(JsonIn, new JsonSerializerSettings
             {
@@ -146,6 +146,15 @@ namespace Inventory
         {
             return Slug + " (ID: " + ID + ")";
         }
+    }
+    [Serializable]
+    public class Mainhand : Item
+    {
+        /// <summary>
+        /// 0 = none, 1 = axe, 2 = pickaxe, 3 = shovel, 4 = melee weapon, 5 = range weapon
+        /// </summary>
+        public int DmgType { get; set; }
+        public float Power { get; set; }
     }
     [Serializable]
     public class Consumable : Item

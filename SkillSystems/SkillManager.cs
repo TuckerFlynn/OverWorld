@@ -13,14 +13,23 @@ public class SkillManager : MonoBehaviour
 
     public Skill[] SkillsDB;
     public Dictionary<string, int> activeSkills = new Dictionary<string, int>();
+    // SkillUIElement holds a skill object, plus a vector3 position where that element is placed
+    List<SkillUIElement> skillUIElements = new List<SkillUIElement>();
 
+    public ViewportZoom zoom;
     [Header("UI ELEMENTS")]
     public GameObject skillsContent;
+    public Text skillPointCount;
     public GameObject connections;
     public ToggleGroup toggleGroup;
+    public GameObject infoPanel;
+
     [Header("PREFABS")]
     public GameObject skillUIPrefab;
     public GameObject UILinePrefab;
+
+    // Events!
+    public event Action OnPassiveSkillChange;
 
     private void Awake()
     {
@@ -33,11 +42,12 @@ public class SkillManager : MonoBehaviour
             Destroy(this.gameObject);
         }
         LoadSkills();
-        LoadCharacterSkills();
     }
 
     private void Start()
     {
+        LoadCharacterSkills();
+        UpdateSkillPointCount();
         SkillWindowLayout();
     }
 
@@ -57,7 +67,8 @@ public class SkillManager : MonoBehaviour
         });
         Debug.Log(string.Format("{0} skills loaded from file", SkillsDB.Length));
     }
-    // Get the activeChar from CharacterManager and load the current skill levels
+    // Get the activeChar from CharacterManager and load the current skill levels;
+    // activeSkills is the most up-to-date reference for skill experience during runtime
     void LoadCharacterSkills()
     {
         if (CharacterManager.characterManager == null)
@@ -70,12 +81,54 @@ public class SkillManager : MonoBehaviour
         }
     }
 
+    public void UpdateSkillPointCount()
+    {
+        skillPointCount.text = string.Format("skill points: {0}", charManager.activeChar.skillPoints);
+    }
+
+    public void AddExperience(Skill skill, int exp)
+    {
+        // Add the experience
+        if (activeSkills.ContainsKey(skill.Title))
+        {
+            int currentLevel = FlynnsGlobalUtilities.ExperienceToLevel(1, activeSkills[skill.Title]);
+            activeSkills[skill.Title] += exp;
+            if (currentLevel < FlynnsGlobalUtilities.ExperienceToLevel(1, activeSkills[skill.Title]))
+            {
+                if ((skill is BaseSkill || skill is PassiveSkill) && OnPassiveSkillChange != null )
+                {
+                    OnPassiveSkillChange();
+                }
+            }
+        }
+        else
+        {
+            activeSkills.Add(skill.Title, exp);
+        }
+        // Update the UI display
+        foreach (SkillUIElement element in skillUIElements)
+        {
+            if (skill.ID == element.Skill.ID)
+            {
+                // Text
+                Text level = element.GO.transform.Find("Text").GetComponent<Text>();
+                level.text = string.Format("level {0}", FlynnsGlobalUtilities.ExperienceToLevel(1, activeSkills[skill.Title]));
+                // Progress bar
+                RectTransform rect = element.GO.transform.Find("ProgressBar/ProgressMask/ProgressGraphic").GetComponent<RectTransform>();
+                rect.sizeDelta = new Vector2(FlynnsGlobalUtilities.ExperienceToLevelProgress(1, activeSkills[skill.Title]) * 30, 0);
+                // THIS IS NECESSARY TO FORCE THE DISPLAY TO UPDATE,
+                // BUT ONLY IF THE PROGRESS BAR IS AT 0 WHEN THE UI WINDOW IS OPENED ... WHY??
+                zoom.Wiggle();
+            }
+        }
+    }
+
     // ---- UI NONSENSE ----
     void SkillWindowLayout()
     {
-        // ---- THIRD VERSION ----
-
-        int maxTier = 3;
+        // ---- THIRD VERSION: Skill tree layout ----
+        int maxTier = 6;
+        float stdSpace = 80.0f;
         int[] tierCounts = new int[maxTier];
 
         // Get number of skills in each tier
@@ -84,8 +137,6 @@ public class SkillManager : MonoBehaviour
             if (skill.Tier < tierCounts.Length)
                 tierCounts[skill.Tier] += 1;
         }
-        Debug.Log(string.Format("Base skills:{0}; First Tier:{1}; Second Tier:{2}", tierCounts[0], tierCounts[1], tierCounts[2]));
-
         // Set radii and find max counts for each tier
         float[] tierRadius = new float[maxTier];
         int[] tierMaxCounts = new int[maxTier];
@@ -93,7 +144,7 @@ public class SkillManager : MonoBehaviour
         tierMaxCounts[0] = 6;
         for (int i = 1; i < maxTier; i++)
         {
-            tierRadius[i] = tierRadius[i - 1] + 64.0f;
+            tierRadius[i] = tierRadius[i - 1] + stdSpace;
             // UI element is considered as occupying a circular area w/ radius of 64,
             // so the max number of elements arranged in a circle is the circumference over 64
             tierMaxCounts[i] = Mathf.FloorToInt(Mathf.PI * 2 * tierRadius[i] / 64);
@@ -104,10 +155,6 @@ public class SkillManager : MonoBehaviour
                 tierMaxCounts[i] = Mathf.FloorToInt(Mathf.PI * 2 * tierRadius[i] / 64);
             }
         }
-
-        // SkillUIElement holds a skill object, plus a vector3 position where that element is placed
-        List<SkillUIElement> skillUIElements = new List<SkillUIElement>();
-
         for (int s = 0; s < maxTier; s++)
         {
             // Get array of possible positions at this tier level
@@ -115,8 +162,10 @@ public class SkillManager : MonoBehaviour
             Vector3[] thisTierPos = new Vector3[tierMaxCounts[s]];
             for (int p = 0; p < thisTierPos.Length; p++)
             {
-                thisTierPos[p] = new Vector3(tierRadius[s] * Mathf.Cos(thisTierAngle * p), tierRadius[s] * Mathf.Sin(thisTierAngle * p));
-
+                if (s % 2 == 0)
+                    thisTierPos[p] = new Vector3(tierRadius[s] * Mathf.Cos(thisTierAngle * p), tierRadius[s] * Mathf.Sin(thisTierAngle * p));
+                else
+                    thisTierPos[p] = new Vector3(tierRadius[s] * Mathf.Cos(thisTierAngle * p + 0.2f), tierRadius[s] * Mathf.Sin(thisTierAngle * p + 0.2f));
             }
             int P = 0;
             foreach (Skill skill in SkillsDB)
@@ -124,8 +173,8 @@ public class SkillManager : MonoBehaviour
                 // Base skills just get the six default positions
                 if (s == 0 && skill.Tier == 0)
                 {
-                    SetupSkillUIElementTwo(skill, thisTierPos[P], Vector3.zero);
-                    skillUIElements.Add(new SkillUIElement(skill, thisTierPos[P]));
+                    GameObject obj = SetupSkillUIElement(skill, thisTierPos[P], Vector3.zero);
+                    skillUIElements.Add(new SkillUIElement(skill, thisTierPos[P], obj));
                     P++;
                     continue;
                 }
@@ -134,17 +183,24 @@ public class SkillManager : MonoBehaviour
                 {
                     Vector3 rootPos = GetRootPositionTwo(skill, skillUIElements);
                     int p = GetIndexOfNearestPosition(thisTierPos, rootPos, skillUIElements);
-                    SetupSkillUIElementTwo(skill, thisTierPos[p], rootPos);
-                    skillUIElements.Add(new SkillUIElement(skill, thisTierPos[p]));
+                    GameObject obj = SetupSkillUIElement(skill, thisTierPos[p], rootPos);
+                    skillUIElements.Add(new SkillUIElement(skill, thisTierPos[p], obj));
                 }
             }
 
         }
     }
 
-    void SetupSkillUIElementTwo (Skill skill, Vector3 pos, Vector3 rootPos)
+    // ---- UI UTILITIES ----
+    GameObject SetupSkillUIElement(Skill skill, Vector3 pos, Vector3 rootPos)
     {
         GameObject element = Instantiate(skillUIPrefab, skillsContent.transform);
+        // Save the skill object to the gameobject for easy reference
+        if (element.TryGetComponent<SkillUI>(out SkillUI skillUI))
+        {
+            skillUI.skill = skill;
+            skillUI.infoPanel = infoPanel;
+        }
         element.transform.localPosition = pos;
         element.name = skill.Title;
         Text[] txts = element.GetComponentsInChildren<Text>();
@@ -155,6 +211,8 @@ public class SkillManager : MonoBehaviour
         if (activeSkills.TryGetValue(skill.Title, out int exp))
         {
             txts[1].text = string.Format("level {0}", FlynnsGlobalUtilities.ExperienceToLevel(1, exp));
+            RectTransform rect = element.transform.Find("ProgressBar/ProgressMask/ProgressGraphic").GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(FlynnsGlobalUtilities.ExperienceToLevelProgress(1, activeSkills[skill.Title]) * 30, 0);
         }
         else
         {
@@ -166,9 +224,8 @@ public class SkillManager : MonoBehaviour
         UILineRenderer lineRend = connection.GetComponent<UILineRenderer>();
         lineRend.Points[0] = new Vector2(element.transform.localPosition.x, element.transform.localPosition.y);
         lineRend.Points[1] = new Vector2(rootPos.x, rootPos.y);
+        return element;
     }
-
-    // ---- UTILITIES ----
 
     Vector3 GetRootPositionTwo (Skill skill, List<SkillUIElement> list)
     {
@@ -198,7 +255,6 @@ public class SkillManager : MonoBehaviour
                 NearestPosIndex = i;
             }
         }
-        Debug.Log(NearestPosIndex);
         return NearestPosIndex;
     }
 
@@ -256,10 +312,12 @@ public class SkillUIElement
 {
     public Skill Skill { get; set; }
     public Vector3 ElementPosition { get; set; }
+    public GameObject GO { get; set; }
 
-    public SkillUIElement(Skill skill, Vector3 vect)
+    public SkillUIElement(Skill skill, Vector3 vect, GameObject obj)
     {
         Skill = skill;
         ElementPosition = vect;
+        GO = obj;
     }
 }

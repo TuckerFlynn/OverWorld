@@ -167,7 +167,7 @@ public class InGameLog : MonoBehaviour
 
             return;
         }
-        // Command to set time
+        // Command to set time: "time <float>"
         if (command.StartsWith("time", System.StringComparison.OrdinalIgnoreCase))
         {
             globalLight = FindObjectOfType<GlobalLight>();
@@ -182,7 +182,7 @@ public class InGameLog : MonoBehaviour
             globalLight.time = float.Parse(s[1]);
             return;
         }
-        // Move the player to the field at the provided coords
+        // Command to move the player to the field at the provided coords: "teleport <X> <Y>"
         if (command.StartsWith("teleport", System.StringComparison.OrdinalIgnoreCase))
         {
             if (CharacterManager.characterManager.InDungeon)
@@ -193,7 +193,7 @@ public class InGameLog : MonoBehaviour
             string[] s = command.Split(' ');
             if (s.Length < 3 || s.Length > 3)
             {
-                Debug.Log("Wrong number of parameters for time command");
+                Debug.Log("Wrong number of parameters for teleport command");
                 return;
             }
             MapManager mapMngr = MapManager.mapManager;
@@ -206,6 +206,19 @@ public class InGameLog : MonoBehaviour
             {
                 Debug.Log("Unable to parse coordinates.");
             }
+            return;
+        }
+        // Command to give player experience: "givexp <Quantity>"
+        if (command.StartsWith("givexp", System.StringComparison.OrdinalIgnoreCase))
+        {
+            string[] s = command.Split(' ');
+            if (s.Length < 2 || s.Length > 2)
+            {
+                Debug.Log("Wrong number of parameters for giveXP command");
+                return;
+            }
+            if (int.TryParse(s[1], out int exp))
+                CharacterManager.characterManager.AddExperience(exp);
             return;
         }
         Debug.Log("Command unknown or improperly formatted");
