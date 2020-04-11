@@ -15,6 +15,7 @@ public class CharacterManager : MonoBehaviour
     public static CharacterManager characterManager;
 
     ItemsDatabase itemDB;
+
     public GameObject charObject;
     public Vector3 surfacePos;
     public bool InDungeon;
@@ -54,8 +55,11 @@ public class CharacterManager : MonoBehaviour
 
     private void OnDisable()
     {
-        ExitDungeon();
-        SaveCharacter();
+        if (MapManager.mapManager != null)
+        {
+            ExitDungeon();
+            SaveCharacter();
+        }
     }
     // Used to ensure that some character has been loaded as activeChar
     public void LoadCharacter()
@@ -91,7 +95,6 @@ public class CharacterManager : MonoBehaviour
     {
         // Update the active character ...
         activeChar.fieldPos = new Vector2Json(charObject.transform.position.x, charObject.transform.position.y);
-        activeChar.Skills = SkillManager.skillManager.activeSkills;
 
         // ... And save the changes to the character config file
         Character[] characters;

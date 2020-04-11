@@ -26,7 +26,7 @@ public class Character
     public float experience;
     public int skillPoints;
 
-    public int maxHealth;
+    public float maxHealth;
     public float health;
 
     public float stamina;

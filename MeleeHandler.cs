@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Inventory;
 using UnityEngine;
 
-public class MeleeCollider : MonoBehaviour
+public class MeleeHandler : MonoBehaviour
 {
     public InventoryManager invenMngr;
 
@@ -16,6 +16,8 @@ public class MeleeCollider : MonoBehaviour
 
     private void Start()
     {
+        invenMngr = InventoryManager.inventoryManager;
+
         anim = GetComponent<Animator>();
         invenMngr.OnMainhandChange += UpdateMainhand;
         // Run update functions in start to make sure values are initialized correctly

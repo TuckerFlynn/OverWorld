@@ -10,6 +10,8 @@ using Inventory;
 
 public class InventoryManager : MonoBehaviour
 {
+    public static InventoryManager inventoryManager;
+
     CharacterManager charMngr;
     ItemsDatabase itemDB;
 
@@ -38,6 +40,15 @@ public class InventoryManager : MonoBehaviour
 
     // Public actions!
     public event Action OnMainhandChange;
+
+    private void Awake()
+    {
+        if (inventoryManager == null)
+            inventoryManager = this;
+        else if (inventoryManager != this)
+            Destroy(this.gameObject);
+
+    }
 
     private void Start()
     {

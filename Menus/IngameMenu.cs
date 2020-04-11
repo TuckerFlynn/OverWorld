@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class IngameMenu : MonoBehaviour
 {
+    [Header("IngameMain")]
     public GameObject escapeMenu;
     public GameObject[] disableOnQuit;
     public GameObject settingsMenu;
@@ -48,11 +49,9 @@ public class IngameMenu : MonoBehaviour
                 return;
             }
         }
-        // And prevent key actions when the crafting search bar is focused
+        // Prevent key actions when the crafting search bar is focused
         if (craftSearch.isFocused)
-        {
             return;
-        }
         
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -74,6 +73,10 @@ public class IngameMenu : MonoBehaviour
                 settingsMenu.SetActive(false);
             }
         }
+        // If the in-game main menu is open, prevent other key actions
+        if (escapeMenu.activeSelf || settingsMenu.activeSelf)
+            return;
+
         if (Input.GetKeyDown(KeyCode.I))
         {
             inventory.SetActive(!inventory.activeSelf);

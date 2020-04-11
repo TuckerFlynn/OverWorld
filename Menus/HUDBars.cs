@@ -22,9 +22,9 @@ public class HUDBars : MonoBehaviour
 
     private void Start()
     {
-        CharacterManager mngr = CharacterManager.characterManager;
-        mngr.OnLevelUp += UpdateLevel;
-        mngr.OnExperienceGain += UpdateExperience;
+        CharacterManager charMngr = CharacterManager.characterManager;
+        charMngr.OnLevelUp += UpdateLevel;
+        charMngr.OnExperienceGain += UpdateExperience;
         // Initial update to all displays when the script starts
         UpdateAll();
     }
