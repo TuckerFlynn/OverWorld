@@ -68,7 +68,7 @@ public static class TilesetLoader
                 {
                     JsonTileProperty jsonProperty = jsonTile.properties[p];
                     if (jsonProperty.name == "moveCost") toAdd.moveCost = float.Parse(jsonProperty.value);
-                    if (jsonProperty.name == "colliderType") toAdd.DefaultColliderType = (UnityEngine.Tilemaps.Tile.ColliderType)int.Parse(jsonProperty.value);
+                    if (jsonProperty.name == "colliderType") toAdd.DefaultColliderType = (Tile.ColliderType)int.Parse(jsonProperty.value);
                     if (jsonProperty.name == "group")
                         toAdd.group = jsonProperty.value;
                 }
@@ -107,7 +107,7 @@ public static class TilesetLoader
                     JsonTileProperty jsonProperty = jsonTile.properties[p];
                     if (jsonProperty.name == "colliderType")
                     {
-                        toAdd.DefaultColliderType = (UnityEngine.Tilemaps.Tile.ColliderType)int.Parse(jsonProperty.value);
+                        toAdd.DefaultColliderType = (Tile.ColliderType)int.Parse(jsonProperty.value);
                     }
                     // Add gameobjects if the property is set to true
                     if (jsonProperty.name == "gameobject")
@@ -155,7 +155,7 @@ public static class TilesetLoader
                     // Set the collider type as none, sprite, or grid
                     if (jsonProperty.name == "colliderType")
                     {
-                        toAdd.DefaultColliderType = (UnityEngine.Tilemaps.Tile.ColliderType)int.Parse(jsonProperty.value);
+                        toAdd.DefaultColliderType = (Tile.ColliderType)int.Parse(jsonProperty.value);
                     }
                     // Add gameobjects if the property is set to true
                     if (jsonProperty.name == "gameobject")
@@ -252,7 +252,7 @@ public static class TilesetLoader
                 {
                     JsonTileProperty jsonProperty = jsonTile.properties[p];
                     if (jsonProperty.name == "moveCost") toAdd.moveCost = float.Parse(jsonProperty.value);
-                    if (jsonProperty.name == "colliderType") toAdd.DefaultColliderType = (UnityEngine.Tilemaps.Tile.ColliderType)int.Parse(jsonProperty.value);
+                    if (jsonProperty.name == "colliderType") toAdd.DefaultColliderType = (Tile.ColliderType)int.Parse(jsonProperty.value);
                     if (jsonProperty.name == "group")
                         toAdd.group = jsonProperty.value;
                 }
@@ -290,9 +290,16 @@ public static class TilesetLoader
                         break;
                 }
                 toAdd.sister = new TileBase[] {
-                    DungeonTiles[0 + adj], DungeonTiles[1 + adj], DungeonTiles[2 + adj], DungeonTiles[3 + adj], DungeonTiles[4 + adj],
-                    DungeonTiles[6 + adj], DungeonTiles[7 + adj], DungeonTiles[8 + adj], DungeonTiles[9 + adj], DungeonTiles[10 + adj]
+                    // ORIGINAL
+                    //DungeonTiles[0 + adj], DungeonTiles[1 + adj], DungeonTiles[2 + adj], DungeonTiles[3 + adj], DungeonTiles[4 + adj],
+                    //DungeonTiles[6 + adj], DungeonTiles[7 + adj], DungeonTiles[8 + adj], DungeonTiles[9 + adj], DungeonTiles[10 + adj]
+
+                    // TEST
+                    DungeonTiles[5 + adj], DungeonTiles[11 + adj]
                 };
+
+                // TEST INVERT
+                toAdd.invert = true;
 
                 DungeonTiles.Add(toAdd);
             }
@@ -320,7 +327,7 @@ public static class TilesetLoader
                     // Set the collider type as none, sprite, or grid
                     if (jsonProperty.name == "colliderType")
                     {
-                        toAdd.DefaultColliderType = (UnityEngine.Tilemaps.Tile.ColliderType)int.Parse(jsonProperty.value);
+                        toAdd.DefaultColliderType = (Tile.ColliderType)int.Parse(jsonProperty.value);
                     }
                     // Add gameobjects if the property is set to true
                     if (jsonProperty.name == "gameobject")

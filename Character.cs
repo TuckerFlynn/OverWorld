@@ -7,6 +7,7 @@ using UnityEngine;
 public class Character
 {
     public string name;
+    public string date;
     // Character has the following equpiment slots:
     /// <summary>
     /// By index: 0=Legs, 1=Chest, 2=Head, 3=Mainhand, 4=Offhand, 5=Amulet, 6=Backpack
@@ -36,6 +37,8 @@ public class Character
 
     public Character()
     {
+        date = DateTime.Now.ToShortDateString();
+
         for (int i = 0; i < inventory.Length; i++)
         {
             inventory[i] = new BasicInvenItem();

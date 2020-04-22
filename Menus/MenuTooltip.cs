@@ -10,13 +10,25 @@ public class MenuTooltip : MonoBehaviour
     public static MenuTooltip menuTooltip;
 
     public GameObject tooltip;
-    public GraphicRaycaster raycaster;
+    [Header("MENU PANELS")]
+    public GameObject MainMenu;
+    public GameObject LoadGameMenu;
+    public GameObject NewWorldMenu;
+    public GameObject NewCharacterMenu;
+    [Header("RAYCASTERS")]
+    public GraphicRaycaster MainRaycaster;
+    public GraphicRaycaster LoadRaycaster;
+    public GraphicRaycaster WorldRaycaster;
+    public GraphicRaycaster CharacterRaycaster;
+    private GraphicRaycaster raycaster;
+
     public EventSystem eventSystem;
     private PointerEventData pointerEventData;
 
     private void Start()
     {
         eventSystem = EventSystem.current;
+        UpdateRaycaster();
     }
 
     private void Update()
@@ -40,11 +52,28 @@ public class MenuTooltip : MonoBehaviour
                 tooltip.transform.position = result.gameObject.transform.position + tooltipScript.offset;
 
                 StringBuilder builder = new StringBuilder();
-                builder.Append("<size=10><color='white'>").Append(tooltipScript.title).Append("</color></size>").AppendLine();
-                builder.Append(tooltipScript.tip);
+                // Ignores blank text fields to allow more flexible tooltips
+                if (!string.IsNullOrWhiteSpace(tooltipScript.title))
+                    builder.Append("<size=10><color='white'>").Append(tooltipScript.title).Append("</color></size>");
+                if (!string.IsNullOrWhiteSpace(tooltipScript.title) && !string.IsNullOrWhiteSpace(tooltipScript.tip))
+                    builder.AppendLine();
+                if (!string.IsNullOrWhiteSpace(tooltipScript.tip))
+                    builder.Append(tooltipScript.tip);
                 tooltip.GetComponentInChildren<Text>().text = builder.ToString();
                 
             }
         }
+    }
+
+    public void UpdateRaycaster ()
+    {
+        if (MainMenu.activeSelf)
+            raycaster = MainRaycaster;
+        else if (LoadGameMenu.activeSelf)
+            raycaster = LoadRaycaster;
+        else if (NewWorldMenu.activeSelf)
+            raycaster = WorldRaycaster;
+        else if (NewCharacterMenu.activeSelf)
+            raycaster = CharacterRaycaster;
     }
 }

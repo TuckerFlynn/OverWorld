@@ -17,8 +17,8 @@ public class MineEntrance : MonoBehaviour
 
     public void SelfStart()
     {
-        dungeonMaster = FindObjectOfType<DungeonMaster>();
-        charMgr = FindObjectOfType<CharacterManager>();
+        dungeonMaster = DungeonMaster.dungeonMaster;
+        charMgr = CharacterManager.characterManager;
 
         CreateOrLoadConfig();
         configSet = true;

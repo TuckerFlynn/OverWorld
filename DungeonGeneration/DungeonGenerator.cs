@@ -46,6 +46,8 @@ public class DungeonGenerator : MonoBehaviour
         hashSeed = seed;
         hash = new XXHash(hashSeed);
 
+        int STYLE_ID = 3;
+
         // Rerun the walker if the quality check fails
         do
         {
@@ -67,32 +69,137 @@ public class DungeonGenerator : MonoBehaviour
         Wall.ClearAllTiles();
         Roof.ClearAllTiles();
         Objects.ClearAllTiles();
+
         // Rough ground tiles
-        TileBase ground1 = TilesetLoader.DungeonTiles[12];
-        TileBase ground2 = TilesetLoader.DungeonTiles[13];
-        TileBase ground3 = TilesetLoader.DungeonTiles[14];
-        TileBase ground4 = TilesetLoader.DungeonTiles[15];
-        TileBase ground5 = TilesetLoader.DungeonTiles[16];
-        TileBase[] groundTiles = { ground1, ground2, ground3, ground4, ground5 };
+        TileBase[] groundTiles = GetGroundTiles(STYLE_ID);
         PaintByNumber(Ground, groundTiles, 1);
-        // Dark tiles
-        TileBase roof1 = TilesetLoader.DungeonTiles[17];
-        TileBase roof2 = TilesetLoader.DungeonTiles[23];
-        TileBase[] roofTiles = { roof1, roof2 };
+
+        // Dark tiles for solid areas
+        TileBase[] roofTiles = GetRoofTiles(STYLE_ID);
         PaintByNumber(Wall, roofTiles, 0);
-        // Boundary tiles, and ground tiles under the boundaries (Sub layer)
-        TileBase wall1 = TilesetLoader.DungeonTiles[49];
-        TileBase[] wallTiles = { wall1 };
-        PaintTheWall(Ground, wallTiles, 0);
+
+        // Roof Border tiles, and ground tiles under the boundaries (Sub layer)
+        TileBase[] borderTiles = GetRoofBorderTiles(STYLE_ID);
+        TileBase[] verticals = GetWallTiles(STYLE_ID);
+
+        PaintTheWall(Wall, borderTiles, 0);
+        PaintVerticals(Ground, Wall, verticals);
         PaintTheWall(Sub, groundTiles, 0);
 
         // Add up and down stairs
-        TileBase stairUpTile = TilesetLoader.DungeonPropTiles[1];
-        Objects.SetTile(stairUp, stairUpTile);
-        TileBase stairDownTile = TilesetLoader.DungeonTiles[53];
-        Ground.SetTile(stairDown, stairDownTile);
+        TileBase[] stairTiles = GetStairTiles(STYLE_ID);
+        Objects.SetTile(stairUp, stairTiles[0]);
+        Ground.SetTile(stairDown, stairTiles[1]);
 
         return stairUp;
+    }
+
+    // ---- TILE COMBINATION PRESETS ----
+
+    TileBase[] GetGroundTiles (int ID)
+    {
+        switch (ID)
+        {
+            // STONE
+            case 1:
+                return new TileBase[] { TilesetLoader.DungeonTiles[0], TilesetLoader.DungeonTiles[1], TilesetLoader.DungeonTiles[2], TilesetLoader.DungeonTiles[3], TilesetLoader.DungeonTiles[4] };
+            // DIRT
+            case 2:
+                return new TileBase[] { TilesetLoader.DungeonTiles[12], TilesetLoader.DungeonTiles[13], TilesetLoader.DungeonTiles[14], TilesetLoader.DungeonTiles[15], TilesetLoader.DungeonTiles[16] };
+            // SAND
+            case 3:
+                return new TileBase[] { TilesetLoader.DungeonTiles[24], TilesetLoader.DungeonTiles[25], TilesetLoader.DungeonTiles[26], TilesetLoader.DungeonTiles[27], TilesetLoader.DungeonTiles[28] };
+            // COLD STONE
+            case 4:
+                return new TileBase[] { TilesetLoader.DungeonTiles[36], TilesetLoader.DungeonTiles[37], TilesetLoader.DungeonTiles[38], TilesetLoader.DungeonTiles[39], TilesetLoader.DungeonTiles[40] };
+            // DEFAULT TO DIRT
+            default:
+                return new TileBase[] { TilesetLoader.DungeonTiles[12], TilesetLoader.DungeonTiles[13], TilesetLoader.DungeonTiles[14], TilesetLoader.DungeonTiles[15], TilesetLoader.DungeonTiles[16] };
+        }
+    }
+    TileBase[] GetRoofTiles (int ID)
+    {
+        switch (ID) 
+        {
+            // STONE
+            case 1:
+                return new TileBase[] { TilesetLoader.DungeonTiles[5], TilesetLoader.DungeonTiles[11] };
+            // DIRT
+            case 2:
+                return new TileBase[] { TilesetLoader.DungeonTiles[17], TilesetLoader.DungeonTiles[23] };
+            // SAND
+            case 3:
+                return new TileBase[] { TilesetLoader.DungeonTiles[29], TilesetLoader.DungeonTiles[35] };
+            // COLD STONE
+            case 4:
+                return new TileBase[] { TilesetLoader.DungeonTiles[41], TilesetLoader.DungeonTiles[47] };
+            // DEFAULT TO DIRT
+            default:
+                return new TileBase[] { TilesetLoader.DungeonTiles[17], TilesetLoader.DungeonTiles[23] };
+        }
+    }
+    TileBase[] GetRoofBorderTiles(int ID )
+    {
+        switch (ID)
+        {
+            // STONE
+            case 1:
+                return new TileBase[] { TilesetLoader.DungeonTiles[48] };
+            // DIRT
+            case 2:
+                return new TileBase[] { TilesetLoader.DungeonTiles[49] };
+            // SAND
+            case 3:
+                return new TileBase[] { TilesetLoader.DungeonTiles[50] };
+            // COLD STONE
+            case 4:
+                return new TileBase[] { TilesetLoader.DungeonTiles[51] };
+            // DEFAULT TO DIRT
+            default:
+                return new TileBase[] { TilesetLoader.DungeonTiles[49] };
+        }
+    }
+    TileBase[] GetWallTiles(int ID)
+    {
+        switch (ID)
+        {
+            // STONE
+            case 1:
+                return new TileBase[] { TilesetLoader.DungeonTiles[56], TilesetLoader.DungeonTiles[57], TilesetLoader.DungeonTiles[58] };
+            // DIRT
+            case 2:
+                return new TileBase[] { TilesetLoader.DungeonTiles[56], TilesetLoader.DungeonTiles[57], TilesetLoader.DungeonTiles[58] };
+            // SAND
+            case 3:
+                return new TileBase[] { TilesetLoader.DungeonTiles[56], TilesetLoader.DungeonTiles[57], TilesetLoader.DungeonTiles[58] };
+            // COLD STONE
+            case 4:
+                return new TileBase[] { TilesetLoader.DungeonTiles[56], TilesetLoader.DungeonTiles[57], TilesetLoader.DungeonTiles[58] };
+            // DEFAULT TO DIRT
+            default:
+                return new TileBase[] { TilesetLoader.DungeonTiles[56], TilesetLoader.DungeonTiles[57], TilesetLoader.DungeonTiles[58] };
+        }
+    }
+    TileBase[] GetStairTiles (int ID)
+    {
+        switch (ID)
+        {
+            // STONE
+            case 1:
+                return new TileBase[] { TilesetLoader.DungeonPropTiles[0], TilesetLoader.DungeonTiles[52] };
+            // DIRT
+            case 2:
+                return new TileBase[] { TilesetLoader.DungeonPropTiles[1], TilesetLoader.DungeonTiles[53] };
+            // SAND
+            case 3:
+                return new TileBase[] { TilesetLoader.DungeonPropTiles[2], TilesetLoader.DungeonTiles[54] };
+            // COLD STONE
+            case 4:
+                return new TileBase[] { TilesetLoader.DungeonPropTiles[3], TilesetLoader.DungeonTiles[55] };
+            // DEFAULT TO DIRT
+            default:
+                return new TileBase[] { TilesetLoader.DungeonPropTiles[1], TilesetLoader.DungeonTiles[53] };
+        }
     }
 
     void BasicWalker (int steps, int branches, bool singleOrigin)
@@ -394,7 +501,8 @@ public class DungeonGenerator : MonoBehaviour
 
     bool InGrid (int index)
     {
-        if (index < 0 || index > 15) return false;
+        if (index < 0 || index > 15)
+            return false;
         return true;
     }
 
@@ -412,6 +520,7 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
     }
+
     void PaintTheWall(Tilemap tilemap, TileBase[] tiles, int key)
     {
         for (int x = 0; x < mapSize; x++)
@@ -421,6 +530,51 @@ public class DungeonGenerator : MonoBehaviour
                 if (Map[x, y] == 1 && HasNeighbour(x, y, key))
                 {
                     tilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], RndFromTiles(tiles));
+                }
+            }
+        }
+    }
+    /// <summary>
+    /// Add Tiles below wall edges to give impression of height
+    /// </summary>
+    /// <param name="drawTilemap"></param>
+    /// <param name="checkTilemap"></param>
+    /// <param name="tiles">Must contain only the three tiles for vertical walls</param>
+    void PaintVerticals(Tilemap drawTilemap, Tilemap checkTilemap, TileBase[] tiles)
+    {
+        for (int x = 0; x < mapSize; x++)
+        {
+            for (int y = 0; y < mapSize-1; y++)
+            {
+                if (Map[x, y] == 1 && HasNeighbour(x, y, 0))
+                {
+                    // Check tiles above
+                    bool a2 = false;
+                    if (IsWithin(new Vector3Int(x - 1, y + 1, 0), 0))
+                    {
+                        a2 = (checkTilemap.GetTile(new Vector3Int(x, y + 1, 0)) != null);
+                    }
+                    // Check tile to left
+                    bool b1IsRoof = false;
+                    if (IsWithin(new Vector3Int(x - 1, y, 0), 0))
+                    {
+                        b1IsRoof = checkTilemap.GetTile(new Vector3Int(x - 1, y, 0)) != null;
+                    }
+                    // Check tile in same pos
+                    bool b2IsRoof = checkTilemap.GetTile(new Vector3Int(x, y, 0)) != null;
+                    // Check tile to right
+                    bool b3IsRoof = false;
+                    if (IsWithin(new Vector3Int(x + 1, y, 0), 0))
+                    {
+                        b3IsRoof = checkTilemap.GetTile(new Vector3Int(x + 1, y, 0)) != null;
+                    }
+
+                    if (a2 && !b1IsRoof && b2IsRoof && b3IsRoof)
+                        drawTilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], tiles[0]);
+                    if (a2 && Map[x, y+1] == 0 && b1IsRoof && b2IsRoof && b3IsRoof)
+                        drawTilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], tiles[1]);
+                    if (a2 && b1IsRoof && b2IsRoof && !b3IsRoof)
+                        drawTilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], tiles[2]);
                 }
             }
         }

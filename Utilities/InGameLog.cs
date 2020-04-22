@@ -98,7 +98,7 @@ public class InGameLog : MonoBehaviour
         // Command to add items to inven: 'additem <ID> <Quantity>'
         if (command.StartsWith("additem", System.StringComparison.OrdinalIgnoreCase))
         {
-            invenMngr = FindObjectOfType<InventoryManager>();
+            invenMngr = InventoryManager.inventoryManager;
 
             string[] s = command.Split(' ');
             if (s.Length < 3 || s.Length > 3)

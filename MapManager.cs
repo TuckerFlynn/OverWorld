@@ -92,7 +92,8 @@ public class MapManager : MonoBehaviour
         children.ForEach(child => Destroy(child));
         // Items dropped on the ground are also removed when moving to a new field
         List<GameObject> drops = new List<GameObject>();
-        foreach (Transform child in GroundItems.transform) drops.Add(child.gameObject);
+        foreach (Transform child in GroundItems.transform)
+            drops.Add(child.gameObject);
         drops.ForEach(drop => Destroy(drop));
 
         // try to load the requested field from file

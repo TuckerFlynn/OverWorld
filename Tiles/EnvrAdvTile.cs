@@ -20,6 +20,7 @@ namespace UnityEngine.Tilemaps
         public Sprite[] m_Sprites;
         // Allows two different terrain tiles to consider each other as themselves
         public TileBase[] sister;
+        public bool invert = false;
 
         /// <summary>
         /// This method is called when the tile is refreshed.
@@ -52,15 +53,64 @@ namespace UnityEngine.Tilemaps
         {
             tileData.transform = Matrix4x4.identity;
             tileData.color = Color.white;
+            int mask;
+            if (!invert)
+            {
+                mask = TileValue(tileMap, location + new Vector3Int(0, 1, 0)) ? 1 : 0;
+                mask += TileValue(tileMap, location + new Vector3Int(1, 1, 0)) ? 2 : 0;
+                mask += TileValue(tileMap, location + new Vector3Int(1, 0, 0)) ? 4 : 0;
+                mask += TileValue(tileMap, location + new Vector3Int(1, -1, 0)) ? 8 : 0;
+                mask += TileValue(tileMap, location + new Vector3Int(0, -1, 0)) ? 16 : 0;
+                mask += TileValue(tileMap, location + new Vector3Int(-1, -1, 0)) ? 32 : 0;
+                mask += TileValue(tileMap, location + new Vector3Int(-1, 0, 0)) ? 64 : 0;
+                mask += TileValue(tileMap, location + new Vector3Int(-1, 1, 0)) ? 128 : 0;
+            }
+            else
+            {
+                // MESSY BUT HANDLES THE INVERTED RULE
+                if (TileValueIsThisTile(tileMap, location + new Vector3Int(0, 1, 0)))
+                    mask = TileValue(tileMap, location + new Vector3Int(0, 1, 0)) ? 1 : 0;
+                else
+                    mask = TileValue(tileMap, location + new Vector3Int(0, 1, 0)) ? 0 : 1;
 
-            int mask = TileValue(tileMap, location + new Vector3Int(0, 1, 0)) ? 1 : 0;
-            mask += TileValue(tileMap, location + new Vector3Int(1, 1, 0)) ? 2 : 0;
-            mask += TileValue(tileMap, location + new Vector3Int(1, 0, 0)) ? 4 : 0;
-            mask += TileValue(tileMap, location + new Vector3Int(1, -1, 0)) ? 8 : 0;
-            mask += TileValue(tileMap, location + new Vector3Int(0, -1, 0)) ? 16 : 0;
-            mask += TileValue(tileMap, location + new Vector3Int(-1, -1, 0)) ? 32 : 0;
-            mask += TileValue(tileMap, location + new Vector3Int(-1, 0, 0)) ? 64 : 0;
-            mask += TileValue(tileMap, location + new Vector3Int(-1, 1, 0)) ? 128 : 0;
+                if (TileValueIsThisTile(tileMap, location + new Vector3Int(1, 1, 0)))
+                    mask += TileValue(tileMap, location + new Vector3Int(1, 1, 0)) ? 2 : 0;
+                else
+                    mask += TileValue(tileMap, location + new Vector3Int(1, 1, 0)) ? 0 : 2;
+
+                if (TileValueIsThisTile(tileMap, location + new Vector3Int(1, 0, 0)))
+                    mask += TileValue(tileMap, location + new Vector3Int(1, 0, 0)) ? 4 : 0;
+                else
+                    mask += TileValue(tileMap, location + new Vector3Int(1, 0, 0)) ? 0 : 4;
+
+                if (TileValueIsThisTile(tileMap, location + new Vector3Int(1, -1, 0)))
+                    mask += TileValue(tileMap, location + new Vector3Int(1, -1, 0)) ? 8 : 0;
+                else
+                    mask += TileValue(tileMap, location + new Vector3Int(1, -1, 0)) ? 0 : 8;
+
+
+                if (TileValueIsThisTile(tileMap, location + new Vector3Int(0, -1, 0)))
+                    mask += TileValue(tileMap, location + new Vector3Int(0, -1, 0)) ? 16 : 0;
+                else
+                    mask += TileValue(tileMap, location + new Vector3Int(0, -1, 0)) ? 0 : 16;
+
+
+                if (TileValueIsThisTile(tileMap, location + new Vector3Int(-1, -1, 0)))
+                    mask += TileValue(tileMap, location + new Vector3Int(-1, -1, 0)) ? 32 : 0;
+                else
+                    mask += TileValue(tileMap, location + new Vector3Int(-1, -1, 0)) ? 0 : 32;
+
+
+                if (TileValueIsThisTile(tileMap, location + new Vector3Int(-1, 0, 0)))
+                    mask += TileValue(tileMap, location + new Vector3Int(-1, 0, 0)) ? 64 : 0;
+                else
+                    mask += TileValue(tileMap, location + new Vector3Int(-1, 0, 0)) ? 0 : 64;
+
+                if (TileValueIsThisTile(tileMap, location + new Vector3Int(-1, 1, 0)))
+                    mask += TileValue(tileMap, location + new Vector3Int(-1, 1, 0)) ? 128 : 0;
+                else
+                    mask += TileValue(tileMap, location + new Vector3Int(-1, 1, 0)) ? 0 : 128;
+            }
 
             byte original = (byte)mask;
             if ((original | 254) < 255) { mask = mask & 125; }
@@ -83,15 +133,26 @@ namespace UnityEngine.Tilemaps
         private bool TileValue(ITilemap tileMap, Vector3Int position)
         {
             TileBase tile = tileMap.GetTile(position);
+            // Check the tile is not null
+            bool isTile = tile != null;
+            if (!isTile)
+                return false;
+            // Check if the tile is this tile, or a sister tile
+            bool isThisTile = tile == this;
             if (sister == null)
             {
-                return (tile != null && tile == this);
+                return (isThisTile);
             }
             else
             {
-                return (tile != null && (tile == this || Array.Exists<TileBase>(sister, t => t == tile) ));
+                bool isSisterTile = Array.Exists<TileBase>(sister, t => t == tile);
+                return (isThisTile || isSisterTile);
             }
-
+        }
+        private bool TileValueIsThisTile(ITilemap tileMap, Vector3Int position)
+        {
+            TileBase tile = tileMap.GetTile(position);
+            return (tile != null && tile == this);
         }
 
         private int GetIndex(byte mask)
