@@ -10,12 +10,16 @@ using Inventory;
 
 public class CharacterMenu : MonoBehaviour
 {
-    ItemsDatabase itemDB;
-    private Sprite[] bodySprites;
-    private List<Item> chestItems = new List<Item>();
-    private List<Item> legItems = new List<Item>();
-    private Sprite[] hairSprites;
+    ItemsDatabase itemsDB;
 
+    Sprite[] bodySprites;
+    List<Item> chestItems = new List<Item>();
+    List<Item> legItems = new List<Item>();
+    Sprite[] hairSprites;
+
+    public InputField playerName;
+
+    [Header("CHARACTER SPRITES")]
     public Image body;
     int b;
     public Image chest;
@@ -27,7 +31,6 @@ public class CharacterMenu : MonoBehaviour
     public Image hair;
     int h;
 
-    public InputField playerName;
 
     void Awake()
     {
@@ -37,21 +40,21 @@ public class CharacterMenu : MonoBehaviour
 
     void Start()
     {
-        itemDB = ItemsDatabase.itemsDatabase;
+        itemsDB = ItemsDatabase.itemsDatabase;
 
-        for (int i = 0; i < itemDB.ItemDatabase.Count; i++)
+        for (int i = 0; i < itemsDB.ItemDatabase.Count; i++)
         {
             // Find starter chest items by their generic titles, this excludes any armours
             string[] chests = { "Belted Shirt", "Tunic", "Blouse", "Overalls", "Dress", "Shirt", "Croptop"};
-            if ( Array.Exists(chests, item => item == itemDB.ItemDatabase[i].Title))
+            if ( Array.Exists(chests, item => item == itemsDB.ItemDatabase[i].Title))
             {
-                chestItems.Add(itemDB.ItemDatabase[i]);
+                chestItems.Add(itemsDB.ItemDatabase[i]);
             }
             // Like above but for legs
             string[] leg = { "Pants", "Boots", "Slippers" };
-            if (Array.Exists(leg, item => item == itemDB.ItemDatabase[i].Title))
+            if (Array.Exists(leg, item => item == itemsDB.ItemDatabase[i].Title))
             {
-                legItems.Add(itemDB.ItemDatabase[i]);
+                legItems.Add(itemsDB.ItemDatabase[i]);
             }
         }
         RandomChar();
@@ -122,26 +125,23 @@ public class CharacterMenu : MonoBehaviour
         hair.sprite = hairSprites[h];
     }
 
-    public void Back()
-    {
-        SceneManager.LoadSceneAsync("MainMenu");
-    }
-
     public void Accept()
     {
-        if (playerName.text != "")
+        // Check the name input is not empty
+        if (string.IsNullOrWhiteSpace(playerName.text))
         {
-            Character character = new Character()
-            {
-                name = playerName.text,
-                bodyIndex = b,
-                hairIndex = h,
-            };
-            character.equipment[0] = l;
-            character.equipment[1] = c;
-
-            SaveCharacter(character);
+            playerName.text = "DefAuLtNaME!!!1";
         }
+        Character character = new Character
+        {
+            name = playerName.text,
+            bodyIndex = b,
+            hairIndex = h
+        };
+        character.equipment[0] = l;
+        character.equipment[1] = c;
+
+        SaveCharacter(character);
     }
 
     void SaveCharacter (Character character)
@@ -165,6 +165,7 @@ public class CharacterMenu : MonoBehaviour
                     return;
                 }
             }
+
             // If the function runs to here, there is no character with the same name to overwrite, so save a new one
             Character[] newCharacters = new Character[characters.Length + 1];
             // Add all old characters to the new array
@@ -183,7 +184,6 @@ public class CharacterMenu : MonoBehaviour
         {
             characters = new Character[] { character };
             string jsonOut = JsonConvert.SerializeObject(characters, Formatting.Indented);
-
             File.WriteAllText(Application.persistentDataPath + "/characters.config", jsonOut);
             Debug.Log("Config created and new character " + character.name + " has been saved.");
         }

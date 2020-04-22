@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainMenu_2 : MonoBehaviour
@@ -20,11 +21,15 @@ public class MainMenu_2 : MonoBehaviour
     public GameObject BackButton;
     public GameObject SettingsButton;
     public GameObject QuitButton;
+    [Header("TOOLTIP SCRIPT")]
+    public MenuTooltip menuTooltip;
 
     private void Start()
     {
         // Hide inactive panels
         LoadGameMenu.SetActive(false);
+        NewWorldMenu.SetActive(false);
+        NewCharacterMenu.SetActive(false);
         // Hide unused buttons
         NewWorldButton.SetActive(false);
         NewCharacterButton.SetActive(false);
@@ -38,17 +43,26 @@ public class MainMenu_2 : MonoBehaviour
 
     public void OnContinueButton ()
     {
-
+        SceneManager.LoadSceneAsync("MapManager");
     }
 
     public void OnLoadButton ()
     {
         MainMenu.SetActive(false);
         LoadGameMenu.SetActive(true);
+        NewWorldMenu.SetActive(false);
+        NewCharacterMenu.SetActive(false);
+
+        menuTooltip.UpdateRaycaster();
     }
     
     public void OnNewGameButton ()
     {
+        MainMenu.SetActive(true);
+        LoadGameMenu.SetActive(false);
+        NewWorldMenu.SetActive(false);
+        NewCharacterMenu.SetActive(false);
+
         ContinueButton.SetActive(false);
         LoadButton.SetActive(false);
         NewGameButton.SetActive(false);
@@ -61,12 +75,22 @@ public class MainMenu_2 : MonoBehaviour
 
     public void OnNewWorldButton ()
     {
+        MainMenu.SetActive(false);
+        LoadGameMenu.SetActive(false);
+        NewWorldMenu.SetActive(true);
+        NewCharacterMenu.SetActive(false);
 
+        menuTooltip.UpdateRaycaster();
     }
 
     public void OnNewCharacterButton ()
     {
+        MainMenu.SetActive(false);
+        LoadGameMenu.SetActive(false);
+        NewWorldMenu.SetActive(false);
+        NewCharacterMenu.SetActive(true);
 
+        menuTooltip.UpdateRaycaster();
     }
 
     public void ReturnToMainMenu ()
@@ -84,6 +108,8 @@ public class MainMenu_2 : MonoBehaviour
         BackButton.SetActive(false);
         SettingsButton.SetActive(true);
         QuitButton.SetActive(true);
+
+        menuTooltip.UpdateRaycaster();
     }
 
     public void OnSettingsButton ()

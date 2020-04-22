@@ -168,9 +168,9 @@ public class IngameMenu : MonoBehaviour
         {
             obj.SetActive(false);
         }
-        Destroy(CharacterManager.characterManager.gameObject);
-        Destroy(MapManager.mapManager.gameObject);
-        SceneManager.LoadSceneAsync("MainMenu");
+        //Destroy(CharacterManager.characterManager.gameObject);
+        //Destroy(MapManager.mapManager.gameObject);
+        SceneManager.LoadSceneAsync("MainMenu_2");
     }
 
     public void Settings()

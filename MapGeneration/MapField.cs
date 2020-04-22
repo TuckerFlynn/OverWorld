@@ -49,7 +49,7 @@ public class MapField {
         if (!Modifier.ContainsKey(mod)) {
             Modifier.Add(mod, obj);
         } else {
-            Debug.LogWarning("Key '" + mod + "' is already used @ " + Position);
+            //Debug.LogWarning("Key '" + mod + "' is already used @ " + Position);
         }
     }
 }

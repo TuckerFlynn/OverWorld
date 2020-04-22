@@ -19,11 +19,12 @@ public class VersionCheck : MonoBehaviour
                 File.Delete(Application.persistentDataPath + "/worldMap.dat");
                 File.Delete(Application.persistentDataPath + "/characters.config");
                 Directory.Delete(Application.persistentDataPath + "/Fields", true);
-                Debug.Log("Save files from previous game versions have been deleted.");
+                Directory.Delete(Application.persistentDataPath + "/Dungeons", true);
+                Debug.Log("Save files from previous game versions have been deleted, now playing build " + thisVersion);
             }
             else
             {
-                Debug.Log("Playing Overworld v" + thisVersion);
+                Debug.Log("Playing Overworld build " + thisVersion);
             }
         }
         PlayerPrefs.SetString("Version", thisVersion);
@@ -31,6 +32,6 @@ public class VersionCheck : MonoBehaviour
 
     private void Start()
     {
-        SceneManager.LoadSceneAsync("MainMenu");
+        SceneManager.LoadSceneAsync("MainMenu_2");
     }
 }

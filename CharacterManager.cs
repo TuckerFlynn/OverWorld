@@ -34,7 +34,6 @@ public class CharacterManager : MonoBehaviour
     {
         if (characterManager == null)
         {
-            DontDestroyOnLoad(gameObject);
             characterManager = this;
         }
         else if (characterManager != this)
@@ -58,14 +57,14 @@ public class CharacterManager : MonoBehaviour
         if (MapManager.mapManager != null)
         {
             ExitDungeon();
-            SaveCharacter();
         }
+        SaveCharacter();
     }
     // Used to ensure that some character has been loaded as activeChar
     public void LoadCharacter()
     {
-        // if no character has been loaded, load the first by default
-        if (activeChar.name == "")
+        // if no character has been set in LoadParameters, load the first by default
+        if (string.IsNullOrEmpty(LoadParameters.loadParameters.activeChar.name))
         {
             // Check if character config file exists
             if (File.Exists(Application.persistentDataPath + "/characters.config"))
@@ -74,6 +73,10 @@ public class CharacterManager : MonoBehaviour
                 string jsonIn = File.ReadAllText(Application.persistentDataPath + "/characters.config");
                 activeChar = JsonConvert.DeserializeObject<Character[]>(jsonIn)[0];
             }
+        }
+        else
+        {
+            activeChar = LoadParameters.loadParameters.activeChar;
         }
         charObject.transform.position = new Vector3(activeChar.fieldPos.x, activeChar.fieldPos.y, 0.0f);
     }
@@ -94,7 +97,10 @@ public class CharacterManager : MonoBehaviour
     public void SaveCharacter()
     {
         // Update the active character ...
-        activeChar.fieldPos = new Vector2Json(charObject.transform.position.x, charObject.transform.position.y);
+        if (InDungeon)
+            activeChar.fieldPos = new Vector2Json(surfacePos.x, surfacePos.y);
+        else
+            activeChar.fieldPos = new Vector2Json(charObject.transform.position.x, charObject.transform.position.y);
 
         // ... And save the changes to the character config file
         Character[] characters;

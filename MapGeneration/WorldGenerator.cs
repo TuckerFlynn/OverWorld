@@ -24,15 +24,11 @@ public class WorldGenerator : MonoBehaviour {
     public Slider biomeScaleSlider;
     float precipScale = 10.0f;
     float tempScale = 20.0F;
-
-    // Equatorial gradient values
     [Header("Equator Gradient Variables")]
     public Slider poleFracSlider;
     public Slider equatorFracSlider;
     float poleFrac = 0.1F;
     float equatorFrac = 1.9f;
-
-    // Mountain gen values
     [Header("Mountain Gen Variables")]
     public Slider hikerCountSlider;
     public Slider minLengthSlider;
@@ -43,8 +39,6 @@ public class WorldGenerator : MonoBehaviour {
     int minHikeLength = 20;
     int maxHikeLength = 80;
     float slopeConst = 0.8f;
-
-    // Water gen values
     [Header("Water Gen Variables")]
     public int swimmerCount = 5;
 
@@ -56,6 +50,9 @@ public class WorldGenerator : MonoBehaviour {
     [Header("GameObjects w/ Renderer")]
     public Image biomeImage;
     public Image heightImage;
+    [Header("Menu Scripts")]
+    public MainMenu_2 mainMenuScript;
+    public LoadMenu_2 loadMenuScript;
 
     private Dictionary<int, string> biomeKey = new Dictionary<int, string>();
 
@@ -451,7 +448,7 @@ public class WorldGenerator : MonoBehaviour {
         while (swimCount > 0 && seedAttempts < swimmerCount * 100) {
             // The starting point of the Swimmer is set with a random (x,y) coordinate similar to the Hikers
             Vector2Int start = new Vector2Int(hash.Range(0, worldSize, h + 1), hash.Range(0, worldSize, h + 2));
-            // Crude (but still fast enoguh) method to find starting points with a high elevation
+            // Crude (but still fast enough) method to find starting points with a high elevation
             if (map[CoordToId(start)].Elevation > 0.8f) {
                 object[] river = { 0.01f };
                 map[CoordToId(start)].AddMod("River", river);
@@ -593,7 +590,7 @@ public class WorldGenerator : MonoBehaviour {
         return texColor;
     }
 
-    public void save ()
+    public void Save ()
     {
         BinaryFormatter bf = new BinaryFormatter();
         FileStream file = File.Open(Application.persistentDataPath + "/worldMap.dat", FileMode.OpenOrCreate);
@@ -603,7 +600,7 @@ public class WorldGenerator : MonoBehaviour {
         Debug.Log("World map saved to system");
     }
 
-    public void load ()
+    public void Load ()
     {
         if (File.Exists(Application.persistentDataPath + "/worldMap.dat"))
         {
@@ -621,9 +618,27 @@ public class WorldGenerator : MonoBehaviour {
             Debug.Log("Unable to find worldMap.dat");
         }
     }
-
-    public void back ()
+    // Save and/or Load the world map and try to start the game; if there is no activeChar redirect user to the character selection window
+    public void StartGame ()
     {
-        SceneManager.LoadSceneAsync("MainMenu");
+        if (!File.Exists(Application.persistentDataPath + "/worldMap.dat") && map != null)
+        {
+            Save();
+        }
+        if (string.IsNullOrWhiteSpace(LoadParameters.loadParameters.activeChar.name))
+        {
+            if (loadMenuScript.characters == null || loadMenuScript.characters.Length == 0)
+            {
+                mainMenuScript.OnNewCharacterButton();
+            } else
+            {
+                mainMenuScript.OnLoadButton();
+            }
+        }
+        else
+        {
+            PlayerPrefs.SetString("LastCharacter", LoadParameters.loadParameters.activeChar.name);
+            SceneManager.LoadSceneAsync("MapManager");
+        }
     }
 }
