@@ -64,7 +64,7 @@ public class CharacterManager : MonoBehaviour
     public void LoadCharacter()
     {
         // if no character has been set in LoadParameters, load the first by default
-        if (string.IsNullOrEmpty(LoadParameters.loadParameters.activeChar.name))
+        if (LoadParameters.loadParameters == null || string.IsNullOrEmpty(LoadParameters.loadParameters.activeChar.name))
         {
             // Check if character config file exists
             if (File.Exists(Application.persistentDataPath + "/characters.config"))

@@ -546,10 +546,17 @@ public class InventoryManager : MonoBehaviour
         RefreshInvenUI();
     }
 
-    // Check if the inventory contains at least the specified amount of an item
+    /// <summary>
+    /// Check if the inventory contains at least the specified amount of an item; checking for item id = 0 will always return true
+    /// </summary>
+    /// <param name="id">Item ID</param>
+    /// <param name="quantity">Required amount</param>
+    /// <returns></returns>
     public bool HaveItems(int id, int quantity)
     {
         bool success = false;
+        if (id == 0)
+            return true;
         int count = 0;
         for (int i = 0; i < Inventory.Length; i++)
         {
@@ -591,39 +598,6 @@ public class InventoryManager : MonoBehaviour
             output[i] = inven[i].Item.ID;
         }
         return output;
-    }
-}
-
-public class InvenItem : IComparable<InvenItem>
-{
-    public Item Item { get; set; }
-    public int Quantity { get; set; }
-
-    public InvenItem()
-    {
-        Item = new Item();
-        Quantity = 0;
-    }
-
-    public int CompareTo(InvenItem other)
-    {
-        if (other == null)
-            return 1;
-
-        if (string.IsNullOrWhiteSpace(this.Item.Title) && !string.IsNullOrWhiteSpace(other.Item.Title))
-        {
-            return 1;
-        }
-        else if (string.IsNullOrWhiteSpace(this.Item.Title) && string.IsNullOrWhiteSpace(other.Item.Title))
-        {
-            return 0;
-        }
-        else if (!string.IsNullOrWhiteSpace(this.Item.Title) && string.IsNullOrWhiteSpace(other.Item.Title))
-        {
-            return -1;
-        }
-
-        return string.Compare(this.Item.Title, other.Item.Title, StringComparison.OrdinalIgnoreCase);
     }
 }
 /// <summary>

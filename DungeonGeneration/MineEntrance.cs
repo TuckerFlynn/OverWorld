@@ -56,7 +56,8 @@ public class MineEntrance : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         // Effectively disables the trigger until the dungeon Config has been set
-        if (!configSet) return;
+        if (!configSet)
+            SelfStart();
         // If the player moves into the mine entrance, open the mine UI
         if (collision.gameObject.TryGetComponent<PlayerControl>(out PlayerControl playerControl))
         {
@@ -67,7 +68,7 @@ public class MineEntrance : MonoBehaviour
     private void OnTriggerExit2D(Collider2D collision)
     {
         // Effectively disables the trigger until the dungeon Config has been set
-        if (!configSet) return;
+        //if (!configSet) return;
         // If the player moves into the mine entrance, open the mine UI
         if (collision.gameObject.TryGetComponent<PlayerControl>(out PlayerControl playerControl))
         {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StairsUp : MonoBehaviour
+public class StairsDown : MonoBehaviour
 {
     CharacterManager charMngr;
     DungeonMaster dungeonMaster;
@@ -19,25 +19,16 @@ public class StairsUp : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.Return))
             {
-                StartCoroutine("DelayedReturnToSurface");
+                StartCoroutine("DelayedStairsDown");
             }
         }
     }
 
-    IEnumerator DelayedReturnToSurface()
+    IEnumerator DelayedStairsDown()
     {
         yield return new WaitForEndOfFrame();
 
-        dungeonMaster.CurrentDepth--;
-
-        if (dungeonMaster.CurrentDepth == 0)
-        {
-            charMngr.ExitDungeon();
-            MapManager.mapManager.LoadField(MapManager.mapManager.worldPos);
-        }
-        else
-        {
-            dungeonMaster.LoadDungeon(false);
-        }
+        dungeonMaster.CurrentDepth++;
+        dungeonMaster.LoadDungeon(true);
     }
 }

@@ -88,7 +88,8 @@ public class MapManager : MonoBehaviour
         Sub.ClearAllTiles();
         Walls.ClearAllTiles();
         List<GameObject> children = new List<GameObject>();
-        foreach (Transform child in Areas.transform) children.Add(child.gameObject);
+        foreach (Transform child in Areas.transform)
+            children.Add(child.gameObject);
         children.ForEach(child => Destroy(child));
         // Items dropped on the ground are also removed when moving to a new field
         List<GameObject> drops = new List<GameObject>();

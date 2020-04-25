@@ -14,6 +14,8 @@ public class DungeonMaster : MonoBehaviour
     public CharacterManager charMngr;
 
     public DungeonGenerator dunGen;
+    public DungeonResources dunResources;
+    public MineBuilder mineBuilder;
     [Header("Mine Entrance UI")]
     public GameObject MineEntranceUI;
     public InputField seedInput;
@@ -28,7 +30,8 @@ public class DungeonMaster : MonoBehaviour
     public GameObject Areas;
     public GameObject[] AreaObjects;
 
-    private DungeonConfig activeConfig;
+    public DungeonConfig activeConfig;
+    public int CurrentDepth = 0;
 
     private void Awake()
     {
@@ -52,18 +55,28 @@ public class DungeonMaster : MonoBehaviour
         charMngr = CharacterManager.characterManager;
     }
 
-    public void LoadDungeon()
+    public void EnterMine()
     {
-        // Clear all children of the Areas gameobject
-        List<GameObject> children = new List<GameObject>();
-        foreach (Transform child in Areas.transform) children.Add(child.gameObject);
-        children.ForEach(child => Destroy(child));
         // Hide mine entrance UI
         MineEntranceUI.SetActive(false);
         // Save the current field and the player's overworld position for when they return to the surface
         MapManager.mapManager.SaveFieldFile(MapManager.mapManager.worldPos);
         charMngr.EnterDungeon();
-        charMngr.charObject.transform.position = dunGen.MainDungeonGen(activeConfig.Seed);
+
+        CurrentDepth++;
+        LoadDungeon(true);
+    }
+
+    public void LoadDungeon(bool descent)
+    {
+        // Clear all chil dren of the Areas gameobject
+        List<GameObject> children = new List<GameObject>();
+        foreach (Transform child in Areas.transform)
+            children.Add(child.gameObject);
+        children.ForEach(child => Destroy(child));
+        // Set character position to the stairs up or down, depending on which direction the player is moving
+        charMngr.charObject.transform.position = dunGen.MainDungeonGen(activeConfig.Seed, descent);
+        dunResources.ResourceGenMaster();
     }
 
     public void EnableMineUI (bool uiActive, DungeonConfig config)
@@ -77,8 +90,9 @@ public class DungeonMaster : MonoBehaviour
             {
                 // Disable input and enable enter
                 seedInput.interactable = false;
-                foreach (Button obj in buttons)
-                    obj.interactable = false;
+                // Disable the 'Refresh' and 'Submit' buttons
+                buttons[0].interactable = false;
+                buttons[1].interactable = false;
                 enterButton.interactable = true;
                 // Retrieve the saved name
                 seedInput.text = activeConfig.SeedString;
@@ -87,15 +101,18 @@ public class DungeonMaster : MonoBehaviour
             {
                 // Enable input and disable enter
                 seedInput.interactable = true;
-                foreach (Button obj in buttons)
-                    obj.interactable = true;
+                // Enable the 'Refresh' and 'Submit' buttons
+                buttons[0].interactable = true;
+                buttons[1].interactable = true;
+                // Disable the 'Enter' button
                 enterButton.interactable = false;
                 // Get a generated name
                 seedInput.text = MineNameGen.MakeName();
                 // Get character level, skill level, and build level
-
+                activeConfig.BaseLevel = CharacterManager.characterManager.activeChar.level;
             }
             WriteMineUIInfo();
+            mineBuilder.WriteMineImprovementInfo();
         }
     }
 
@@ -106,8 +123,17 @@ public class DungeonMaster : MonoBehaviour
 
     public void ImproveMine()
     {
+        // Get the required materials and remove them from the player inventory
+        InvenItem[] requiredItems = mineBuilder.GetResources(1);
+        for (int i = 0; i < 3; i++)
+        {
+            if (requiredItems[i].Quantity != 0)
+                InventoryManager.inventoryManager.RemoveFromInventory(requiredItems[i].Item.ID, requiredItems[i].Quantity);
+        }
         activeConfig.BuildLevel++;
+        // Refresh the UI display
         WriteMineUIInfo();
+        mineBuilder.WriteMineImprovementInfo();
     }
 
     public void ConfirmMineConfig ()
@@ -123,7 +149,7 @@ public class DungeonMaster : MonoBehaviour
 
         EnableMineUI(true, activeConfig);
     }
-
+    // Display mine level and resource density info
     void WriteMineUIInfo ()
     {
         StringBuilder mineInfo = new StringBuilder();

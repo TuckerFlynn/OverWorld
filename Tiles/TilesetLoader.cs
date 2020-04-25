@@ -247,14 +247,39 @@ public static class TilesetLoader
                 // Tile asset to build
                 EnvrTile toAdd = ScriptableObject.CreateInstance<EnvrTile>();
                 toAdd.DefaultSprite = spriteSheet[t];
+
+                JsonTileProperty name = Array.Find(jsonTile.properties, p => p.name == "name");
                 // Loop through properties on tile
                 for (int p = 0; p < jsonTile.properties.Length; p++)
                 {
+
                     JsonTileProperty jsonProperty = jsonTile.properties[p];
                     if (jsonProperty.name == "moveCost") toAdd.moveCost = float.Parse(jsonProperty.value);
                     if (jsonProperty.name == "colliderType") toAdd.DefaultColliderType = (Tile.ColliderType)int.Parse(jsonProperty.value);
                     if (jsonProperty.name == "group")
                         toAdd.group = jsonProperty.value;
+                    // Very few ground tiles will have gameobjects, but some will!
+                    if (jsonProperty.name == "gameobject")
+                    {
+                        bool.TryParse(jsonProperty.value, out bool hasGameObject);
+
+                        if (hasGameObject)
+                        {
+                            if (Resources.Load<GameObject>("Tilesets/Gameobjects/dungeon_" + t) != null)
+                            {
+                                toAdd.DefaultGameObject = Resources.Load<GameObject>("Tilesets/Gameobjects/dungeon_" + t);
+                            }
+                            else if (name != null && !string.IsNullOrWhiteSpace(name.value))
+                            {
+                                toAdd.DefaultGameObject = Resources.Load<GameObject>("Tilesets/Gameobjects/" + name.value);
+                            }
+                            else
+                            {
+                                Debug.Log("Unable to find a gameobject for dungeon tile '" + name.value + "'");
+                            }
+                        }
+
+                    }
                 }
                 DungeonTiles.Add(toAdd);
             }

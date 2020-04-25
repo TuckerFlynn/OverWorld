@@ -18,6 +18,8 @@ public class DungeonGenerator : MonoBehaviour
     XXHash hash;
     [Header("Dungeon Gen Seed")]
     public int hashSeed;
+    [Header("Dungeon Style")]
+    public int STYLE_ID = 1;
     [Header("Walker Input")]
     public int minSteps = 200;
     public int maxSteps = 1000;
@@ -25,7 +27,7 @@ public class DungeonGenerator : MonoBehaviour
     public int maxBranches = 6;
     public bool OneOrigin = true;
     
-    int[,] Map;
+    public int[,] Map;
     Vector3Int[] positions;
     Vector3Int stairUp;
     Vector3Int stairDown;
@@ -38,15 +40,14 @@ public class DungeonGenerator : MonoBehaviour
             positions[index] = new Vector3Int(index % mapSize, index / mapSize, 0);
         }
         Map = new int[mapSize, mapSize];
+        ResetStairPositions();
     }
-
-    public Vector3Int MainDungeonGen(int seed)
+    // Returns a Vector3Int that marks the position of the stairs going up
+    public Vector3Int MainDungeonGen(int seed, bool descent)
     {
         int h = 0;
         hashSeed = seed;
         hash = new XXHash(hashSeed);
-
-        int STYLE_ID = 3;
 
         // Rerun the walker if the quality check fails
         do
@@ -70,33 +71,47 @@ public class DungeonGenerator : MonoBehaviour
         Roof.ClearAllTiles();
         Objects.ClearAllTiles();
 
-        // Rough ground tiles
+        // Rough ground tiles; the entire ground layer is filled because eventually the cave walls will be destructible
         TileBase[] groundTiles = GetGroundTiles(STYLE_ID);
         PaintByNumber(Ground, groundTiles, 1);
+        PaintByNumber(Ground, groundTiles, 0);
 
         // Dark tiles for solid areas
         TileBase[] roofTiles = GetRoofTiles(STYLE_ID);
-        PaintByNumber(Wall, roofTiles, 0);
+        PaintByNumber(Roof, roofTiles, 0);
 
         // Roof Border tiles, and ground tiles under the boundaries (Sub layer)
         TileBase[] borderTiles = GetRoofBorderTiles(STYLE_ID);
         TileBase[] verticals = GetWallTiles(STYLE_ID);
 
-        PaintTheWall(Wall, borderTiles, 0);
-        PaintVerticals(Ground, Wall, verticals);
-        PaintTheWall(Sub, groundTiles, 0);
+        PaintTheWall(Roof, borderTiles, 0);
+        PaintVerticals(Wall, Roof, verticals);
+        //PaintTheWall(Sub, groundTiles, 0);
 
         // Add up and down stairs
         TileBase[] stairTiles = GetStairTiles(STYLE_ID);
         Objects.SetTile(stairUp, stairTiles[0]);
-        Ground.SetTile(stairDown, stairTiles[1]);
+        // Mines will have a maximum of 100 floors, once floor 100 is reached there will be no stairs leading down
+        if (DungeonMaster.dungeonMaster.CurrentDepth < 100)
+            Ground.SetTile(stairDown, stairTiles[1]);
 
-        return stairUp;
+        // If the player is descending, character position is set to the stair going up (connecting to the previous level)
+        if (descent)
+            return stairUp;
+        // If player is ascending, position is set to the stairs going down (arriving from the previous level)
+        else
+            return stairDown;
+    }
+
+    public void ResetStairPositions()
+    {
+        stairUp = new Vector3Int(-1, -1, 0);
+        stairDown = new Vector3Int(-1, -1, 0);
     }
 
     // ---- TILE COMBINATION PRESETS ----
 
-    TileBase[] GetGroundTiles (int ID)
+    public TileBase[] GetGroundTiles (int ID)
     {
         switch (ID)
         {
@@ -202,6 +217,8 @@ public class DungeonGenerator : MonoBehaviour
         }
     }
 
+    // ---- CAVE GENERATION METHODS ----
+
     void BasicWalker (int steps, int branches, bool singleOrigin)
     {
         Map = new int[mapSize, mapSize];
@@ -279,7 +296,6 @@ public class DungeonGenerator : MonoBehaviour
 
         return nextStep;
     }
-
     // Return the opposite direction of d
     int OppositeDir (int d)
     {
@@ -368,9 +384,82 @@ public class DungeonGenerator : MonoBehaviour
         }
         return newMap;
     }
+    // Fill tiles based on the values set in the Map array
+    void PaintByNumber(Tilemap tilemap, TileBase[] tiles, int key)
+    {
+        for (int x = 0; x < mapSize; x++)
+        {
+            for (int y = 0; y < mapSize; y++)
+            {
+                if (Map[x, y] == key)
+                {
+                    tilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], RndFromTiles(tiles));
+                }
+            }
+        }
+    }
+
+    void PaintTheWall(Tilemap tilemap, TileBase[] tiles, int key)
+    {
+        for (int x = 0; x < mapSize; x++)
+        {
+            for (int y = 0; y < mapSize; y++)
+            {
+                if (Map[x, y] == 1 && HasNeighbour(x, y, key))
+                {
+                    tilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], RndFromTiles(tiles));
+                }
+            }
+        }
+    }
+    /// <summary>
+    /// Add Tiles below wall edges to give impression of height
+    /// </summary>
+    /// <param name="drawTilemap"></param>
+    /// <param name="checkTilemap"></param>
+    /// <param name="tiles">Must contain only the three tiles for vertical walls</param>
+    void PaintVerticals(Tilemap drawTilemap, Tilemap checkTilemap, TileBase[] tiles)
+    {
+        for (int x = 0; x < mapSize; x++)
+        {
+            for (int y = 0; y < mapSize - 1; y++)
+            {
+                if (Map[x, y] == 1 && HasNeighbour(x, y, 0))
+                {
+                    // Check tiles above
+                    bool a2 = false;
+                    if (IsWithin(new Vector3Int(x - 1, y + 1, 0), 0))
+                    {
+                        a2 = (checkTilemap.GetTile(new Vector3Int(x, y + 1, 0)) != null);
+                    }
+                    // Check tile to left
+                    bool b1IsRoof = false;
+                    if (IsWithin(new Vector3Int(x - 1, y, 0), 0))
+                    {
+                        b1IsRoof = checkTilemap.GetTile(new Vector3Int(x - 1, y, 0)) != null;
+                    }
+                    // Check tile in same pos
+                    bool b2IsRoof = checkTilemap.GetTile(new Vector3Int(x, y, 0)) != null;
+                    // Check tile to right
+                    bool b3IsRoof = false;
+                    if (IsWithin(new Vector3Int(x + 1, y, 0), 0))
+                    {
+                        b3IsRoof = checkTilemap.GetTile(new Vector3Int(x + 1, y, 0)) != null;
+                    }
+
+                    if (a2 && !b1IsRoof && b2IsRoof && b3IsRoof)
+                        drawTilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], tiles[0]);
+                    if (a2 && Map[x, y + 1] == 0 && b1IsRoof && b2IsRoof && b3IsRoof)
+                        drawTilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], tiles[1]);
+                    if (a2 && b1IsRoof && b2IsRoof && !b3IsRoof)
+                        drawTilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], tiles[2]);
+                }
+            }
+        }
+    }
 
     // --- RESULTS-ANALYSIS FUNCTIONS ---
-    
+
     float TotalClearDungeon ()
     {
         float count = 0;
@@ -506,79 +595,11 @@ public class DungeonGenerator : MonoBehaviour
         return true;
     }
 
-    // Fill tiles based on the values set in the Map array
-    void PaintByNumber(Tilemap tilemap, TileBase[] tiles, int key)
-    {
-        for (int x = 0; x < mapSize; x++)
-        {
-            for (int y = 0; y < mapSize; y++)
-            {
-                if (Map[x,y] == key)
-                {
-                    tilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], RndFromTiles(tiles));
-                }
-            }
-        }
-    }
+    // ---- RESOURCE LAYOUT METHODS ----
 
-    void PaintTheWall(Tilemap tilemap, TileBase[] tiles, int key)
-    {
-        for (int x = 0; x < mapSize; x++)
-        {
-            for (int y = 0; y < mapSize; y++)
-            {
-                if (Map[x, y] == 1 && HasNeighbour(x, y, key))
-                {
-                    tilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], RndFromTiles(tiles));
-                }
-            }
-        }
-    }
-    /// <summary>
-    /// Add Tiles below wall edges to give impression of height
-    /// </summary>
-    /// <param name="drawTilemap"></param>
-    /// <param name="checkTilemap"></param>
-    /// <param name="tiles">Must contain only the three tiles for vertical walls</param>
-    void PaintVerticals(Tilemap drawTilemap, Tilemap checkTilemap, TileBase[] tiles)
-    {
-        for (int x = 0; x < mapSize; x++)
-        {
-            for (int y = 0; y < mapSize-1; y++)
-            {
-                if (Map[x, y] == 1 && HasNeighbour(x, y, 0))
-                {
-                    // Check tiles above
-                    bool a2 = false;
-                    if (IsWithin(new Vector3Int(x - 1, y + 1, 0), 0))
-                    {
-                        a2 = (checkTilemap.GetTile(new Vector3Int(x, y + 1, 0)) != null);
-                    }
-                    // Check tile to left
-                    bool b1IsRoof = false;
-                    if (IsWithin(new Vector3Int(x - 1, y, 0), 0))
-                    {
-                        b1IsRoof = checkTilemap.GetTile(new Vector3Int(x - 1, y, 0)) != null;
-                    }
-                    // Check tile in same pos
-                    bool b2IsRoof = checkTilemap.GetTile(new Vector3Int(x, y, 0)) != null;
-                    // Check tile to right
-                    bool b3IsRoof = false;
-                    if (IsWithin(new Vector3Int(x + 1, y, 0), 0))
-                    {
-                        b3IsRoof = checkTilemap.GetTile(new Vector3Int(x + 1, y, 0)) != null;
-                    }
 
-                    if (a2 && !b1IsRoof && b2IsRoof && b3IsRoof)
-                        drawTilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], tiles[0]);
-                    if (a2 && Map[x, y+1] == 0 && b1IsRoof && b2IsRoof && b3IsRoof)
-                        drawTilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], tiles[1]);
-                    if (a2 && b1IsRoof && b2IsRoof && !b3IsRoof)
-                        drawTilemap.SetTile(positions[CoordToId(new Vector2Int(x, y), mapSize)], tiles[2]);
-                }
-            }
-        }
-    }
+
+    // ---- TILE UTILITIES ----
 
     TileBase RndFromTiles(TileBase[] tiles)
     {

@@ -23,6 +23,8 @@ public class MainMenu_2 : MonoBehaviour
     public GameObject QuitButton;
     [Header("TOOLTIP SCRIPT")]
     public MenuTooltip menuTooltip;
+    [Header("MISC")]
+    public Text version;
 
     private void Start()
     {
@@ -39,6 +41,8 @@ public class MainMenu_2 : MonoBehaviour
             ContinueButton.GetComponent<Button>().interactable = true;
         else
             ContinueButton.GetComponent<Button>().interactable = false;
+
+        version.text = "version b" + Application.version;
     }
 
     public void OnContinueButton ()
