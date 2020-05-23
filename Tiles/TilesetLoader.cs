@@ -116,9 +116,12 @@ public static class TilesetLoader
 
                         if (hasGameObject)
                         {
-                            if (Resources.Load<GameObject>("Tilesets/Gameobjects/plants_" + t) != null)
+                            if (Resources.Load<GameObject>("Tilesets/Gameobjects/PlantObjects/plants_" + t) != null)
                             {
-                                toAdd.DefaultGameObject = Resources.Load<GameObject>("Tilesets/Gameobjects/plants_" + t);
+                                // Test for solving reference issue
+                                //GameObject go = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("Tilesets/Gameobjects/plants_" + t));
+                                //toAdd.DefaultGameObject = go;
+                                toAdd.DefaultGameObject = Resources.Load<GameObject>("Tilesets/Gameobjects/PlantObjects/plants_" + t);
                             }
                             else
                             {
@@ -385,7 +388,7 @@ public static class TilesetLoader
         }
     }
 
-    // Get a field from this class by string, ie. InvenItem[] inven = invenMngr.GetInvenByString<InvenItem[]>("Inventory");
+    // Get a field from this class by string, ie. List<TileBase> GroundTiles = TilesetLoader.GetInvenByString<>("GroundTiles");
     public static T GetTilesetByString<T>(string set)
     {
         return (T)typeof(TilesetLoader).GetField(set).GetValue(null);

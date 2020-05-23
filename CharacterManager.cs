@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using Newtonsoft.Json;
+using UnityEngine.Tilemaps;
 
 /// <summary>
 /// This class is used to load, hold, update and save any data related to the active
@@ -25,6 +26,7 @@ public class CharacterManager : MonoBehaviour
 
     public Character activeChar;
     public HUDBars hudBars;
+    public TilemapCollider2D roofCollider;
 
     // Events that trigger updates to UI elements
     public event Action OnExperienceGain;
@@ -33,13 +35,10 @@ public class CharacterManager : MonoBehaviour
     private void Awake()
     {
         if (characterManager == null)
-        {
             characterManager = this;
-        }
         else if (characterManager != this)
-        {
-            Destroy(this.gameObject);
-        }
+            Destroy(this);
+
         bodySprites = Resources.LoadAll<Sprite>("Sprites/Character/body");
         hairSprites = Resources.LoadAll<Sprite>("Sprites/Character/hair");
 
@@ -101,6 +100,7 @@ public class CharacterManager : MonoBehaviour
             activeChar.fieldPos = new Vector2Json(surfacePos.x, surfacePos.y);
         else
             activeChar.fieldPos = new Vector2Json(charObject.transform.position.x, charObject.transform.position.y);
+        activeChar.hunger = HungerManager.hungerManager.hunger;
 
         // ... And save the changes to the character config file
         Character[] characters;
@@ -162,6 +162,8 @@ public class CharacterManager : MonoBehaviour
     {
         InDungeon = true;
         surfacePos = charObject.transform.position;
+
+        roofCollider.isTrigger = false;
     }
     public void ExitDungeon()
     {
@@ -169,6 +171,8 @@ public class CharacterManager : MonoBehaviour
         {
             InDungeon = false;
             charObject.transform.position = surfacePos;
+
+            roofCollider.isTrigger = true;
         }
     }
 }

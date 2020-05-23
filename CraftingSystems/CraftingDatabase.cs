@@ -56,8 +56,11 @@ public class CraftRecipe
     public int OutputID { get; set; }
     public int OutputQuantity { get; set; }
     public List<CraftInput> Inputs { get; set; }
-    public float CraftTime { get; set; }
+
+    public int Station { get; set; }
+
     // Not used yet, but will be added
+    public float CraftTime { get; set; }
     //public int Skill { get; set; }
     //public float Experience { get; set; }
 

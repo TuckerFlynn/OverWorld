@@ -47,17 +47,17 @@ public static class TiledHelper
         };
         tiled.tilesets[3] = new TiledTileset
         {
-            firstgid = 181,
+            firstgid = 205,
             source = "../Constructors/buildingsTileset.json"
         };
         tiled.tilesets[4] = new TiledTileset
         {
-            firstgid = 277,
+            firstgid = 301,
             source = "../Constructors/dungeonTileset.json"
         };
         tiled.tilesets[5] = new TiledTileset
         {
-            firstgid = 337,
+            firstgid = 361,
             source = "../Constructors/dungeonPropsTileset.json"
         };
         return tiled;

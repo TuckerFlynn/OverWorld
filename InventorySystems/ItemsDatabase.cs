@@ -93,7 +93,8 @@ public class ItemsDatabase : MonoBehaviour
         return ItemDatabase.Find(item => item.Slug == slug);
     }
 
-    // Use to rewrite the items.json file if internal class changes have been made an need to be applied
+    // Use to rewrite the items.json file if widespread internal class changes have been made an need to be applied
+
     //private void OnDisable()
     //{
     //    // Allows preserving multiple classes through serialization by setting the $type value
@@ -158,14 +159,15 @@ namespace Inventory
     [Serializable]
     public class Consumable : Item
     {
-        public bool isConsumable { get; set; }
         public List<StatusEffect> Effects = new List<StatusEffect>();
     }
     [Serializable]
     public class StatusEffect
     {
         public string Status { get; set; }
+        public bool Discrete { get; set; }
         public float Effect { get; set; }
+        public float Time { get; set; }
     }
     [Serializable]
     public class Building : Item

@@ -97,5 +97,19 @@ public class PlayerControl : MonoBehaviour
             string info = string.Format("+{0} {1}", added, item);
             floatTxt.CreateText(info, rb2D.transform.position, 0.5f);
         }
+        // If player collides with a crafting station area
+        if (col.gameObject.TryGetComponent<CraftingStationTrigger>(out CraftingStationTrigger station))
+        {
+            CraftingManager.craftingManager.UpdateAvailableStation(true, station.stationID);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D col)
+    {
+        // If player exits a crafting station area
+        if (col.gameObject.TryGetComponent<CraftingStationTrigger>(out CraftingStationTrigger station))
+        {
+            CraftingManager.craftingManager.UpdateAvailableStation(false, station.stationID);
+        }
     }
 }

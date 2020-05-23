@@ -59,4 +59,11 @@ public class HUDBars : MonoBehaviour
 
         expText.text = string.Format("experience: {0}/{1}", roundExp.ToString(), roundNextExp.ToString());
     }
+
+    public void UpdateHunger (float hunger)
+    {
+        hungerBar.offsetMax = new Vector2(hunger / 100 * maxWidth + pad, -7.0f);
+
+        hungerText.text = string.Format("hunger: {0}/100", Mathf.RoundToInt(hunger));
+    }
 }

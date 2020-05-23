@@ -43,10 +43,11 @@ public class DungeonResources : MonoBehaviour
                 if (map[x,y] == 1 && Random.value < activeConfig.ResourceDensity && !HasNeighbour(x, y, 0))
                 {
                     // Prevent overwriting the stairs to the level above (also in the objects layer)
-                    if (Objects.GetTile(new Vector3Int(x, y, 0)) != null)
-                        continue;
-                    TileBase[] stones = { TilesetLoader.PropTiles[0], TilesetLoader.PropTiles[1], TilesetLoader.PropTiles[2], TilesetLoader.PropTiles[3], TilesetLoader.PropTiles[4], TilesetLoader.PropTiles[5] };
-                    Objects.SetTile(new Vector3Int(x, y, 0), RndFromTiles(stones));
+                    if (Objects.GetTile(new Vector3Int(x, y, 0)) == null)
+                    {
+                        TileBase[] stones = { TilesetLoader.PropTiles[0], TilesetLoader.PropTiles[1], TilesetLoader.PropTiles[2], TilesetLoader.PropTiles[3], TilesetLoader.PropTiles[4], TilesetLoader.PropTiles[5] };
+                        Objects.SetTile(new Vector3Int(x, y, 0), RndFromTiles(stones));
+                    }
                 }
             }
         }

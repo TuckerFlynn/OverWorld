@@ -62,14 +62,14 @@ public class MapManager : MonoBehaviour
         LoadField(worldPos);
     }
 
-    private void OnDisable()
-    {
-        // Only save fields on disable if the player is not in a dungeon
-        if (charMngr != null && !charMngr.InDungeon)
-        {
-            SaveFieldFile(worldPos);
-        }
-    }
+    //private void OnDisable()
+    //{
+    //    // Only save fields on disable if the player is not in a dungeon
+    //    if (charMngr != null && !charMngr.InDungeon)
+    //    {
+    //        SaveFieldFile(worldPos);
+    //    }
+    //}
 
     // Load a field from file or generate a new one
     public void LoadField (Vector2Int pos)
@@ -84,9 +84,12 @@ public class MapManager : MonoBehaviour
         charMngr.activeChar.worldPos = new Vector2IntJson(worldPos);
 
         // Clear tiles and all children of the Areas gameobject
+        Sub.ClearAllTiles();
         Ground.ClearAllTiles();
         Sub.ClearAllTiles();
         Walls.ClearAllTiles();
+        Roof.ClearAllTiles();
+
         List<GameObject> children = new List<GameObject>();
         foreach (Transform child in Areas.transform)
             children.Add(child.gameObject);
@@ -206,6 +209,9 @@ public class MapManager : MonoBehaviour
         string path = Application.persistentDataPath + "/Fields/" + pos.x + "_" + pos.y + ".json";
         string json = TiledHelper.WriteJsonMap(tiled);
         File.WriteAllText(path, json);
+
+        // --- SAVE THE GAMEOBJECT DATA HERE
+        TileDataLoader.tileDataLoader.SaveTileData();
     }
 
     public void LoadFieldFile(Vector2Int pos)
@@ -265,6 +271,9 @@ public class MapManager : MonoBehaviour
                 instance.GetComponent<RoofArea>().CreateRoofArea(tObj, Roof, Vector3Int.zero, 0);
             }
         }
+
+        // LOAD THE GAMEOBJECT DATA HERE?
+        TileDataLoader.tileDataLoader.LoadTileData();
     }
 
     // Load the world map from file

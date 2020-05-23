@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class CraftingManager : MonoBehaviour
 {
+    public static CraftingManager craftingManager;
+
     ItemsDatabase itemDB;
     public InventoryManager invenMngr;
     CraftingDatabase craftingDB;
@@ -26,19 +28,29 @@ public class CraftingManager : MonoBehaviour
     public List<GameObject> ContentButtons = new List<GameObject>();
     [Header("Filters")]
     public InputField search;
+    public List<int> availableStations = new List<int>();
 
     private CraftRecipe activeRecipe;
 
     void Awake()
 	{
-        itemDB = ItemsDatabase.itemsDatabase;
-		craftingDB = CraftingDatabase.craftingDatabase;
+        if (craftingManager == null)
+            craftingManager = this;
+        else if (craftingManager != this)
+            Destroy(this);
     }
 
     private void Start()
     {
+        itemDB = ItemsDatabase.itemsDatabase;
+        craftingDB = CraftingDatabase.craftingDatabase;
+
+        availableStations.Add(0);
+
         RefreshRecipeButtons();
     }
+
+    // ------- UI SETUP --------
 
     // Delete all displayed recipes and rebuild the list
     public void RefreshRecipeButtons()
@@ -87,6 +99,12 @@ public class CraftingManager : MonoBehaviour
             // If there is a search input and a recipe has no matches, don't add a button for it
             if (searchFilter && !success)
             {
+                continue;
+            }
+            // Skip a recipe if the required crafting station is not available
+            if (!availableStations.Contains(craftRecipe.Station))
+            {
+                Debug.Log(string.Format("Unable to craft {0}; not close enough to crafting station {1}", craftRecipe.Title, craftRecipe.Station));
                 continue;
             }
 
@@ -244,6 +262,9 @@ public class CraftingManager : MonoBehaviour
             noInfoPanel.SetActive(true);
         }
     }
+
+    // ----- THE IMPORTANT ONE -----
+
     // Remove input items from the character inventory and add the output
     public void Craft(int amount)
     {
@@ -284,5 +305,18 @@ public class CraftingManager : MonoBehaviour
         }
 
         UpdateRecipeButtons();
+        RefreshUI();
+    }
+
+    // ------- UTILITIES -------
+    public void UpdateAvailableStation (bool add, int ID)
+    {
+        if (add)
+            availableStations.Add(ID);
+        else
+            availableStations.Remove(ID);
+
+        RefreshRecipeButtons();
+        RefreshUI();
     }
 }

@@ -131,6 +131,14 @@ public class InventoryManager : MonoBehaviour
                         builder.Append("</color></size>");
                     }
 
+                    if (Inventory[tooltipScript.index].Item is Consumable consumable)
+                    {
+                        builder.AppendLine();
+                        builder.Append("<size=6><color='red'>");
+                        builder.Append(consumable.Effects[0].Status).Append(": ").Append(consumable.Effects[0].Effect);
+                        builder.Append("</color></size>");
+                    }
+
                     tooltip.GetComponentInChildren<Text>().text = builder.ToString();
                 }
             }

@@ -49,6 +49,8 @@ public class DungeonGenerator : MonoBehaviour
         hashSeed = seed;
         hash = new XXHash(hashSeed);
 
+        STYLE_ID = GetDungeonStyleFromBiome();
+
         // Rerun the walker if the quality check fails
         do
         {
@@ -107,6 +109,33 @@ public class DungeonGenerator : MonoBehaviour
     {
         stairUp = new Vector3Int(-1, -1, 0);
         stairDown = new Vector3Int(-1, -1, 0);
+    }
+
+    int GetDungeonStyleFromBiome ()
+    {
+        MapManager mngr = MapManager.mapManager;
+        string biome = mngr.masterMap[CoordToId(mngr.worldPos, mngr.worldSize)].MainBiome;
+
+        switch (biome)
+        {
+            case "grassland":
+            case "temperateForest":
+                return 1;
+            case "bog":
+            case "swamp":
+            case "temperateJungle":
+            case "tropicalJungle":
+                return 2;
+            case "desert":
+                return 3;
+            case "arctic":
+            case "arcticWaste":
+            case "tundra":
+            case "borealForest":
+                return 4;
+            default:
+                return 2;
+        }
     }
 
     // ---- TILE COMBINATION PRESETS ----
@@ -222,7 +251,7 @@ public class DungeonGenerator : MonoBehaviour
     void BasicWalker (int steps, int branches, bool singleOrigin)
     {
         Map = new int[mapSize, mapSize];
-        stairUp = new Vector3Int(1 + Random.Range(0, mapSize - 2), 1 + Random.Range(0, mapSize - 2), 0);
+        stairUp = new Vector3Int(2 + Random.Range(0, mapSize - 4), 2 + Random.Range(0, mapSize - 4), 0);
 
         for (int b = 0; b < branches; b++)
         {

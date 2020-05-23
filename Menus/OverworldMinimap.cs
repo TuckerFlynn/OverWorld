@@ -34,20 +34,17 @@ public class OverworldMinimap : MonoBehaviour
                 //int pixIndex = Mathf.FloorToInt(minimapPix.Length/2) + CoordToId(new Vector2Int(x,y), zoom*2+1);
 
                 int i = CoordToId(pos, mapManager.worldSize);
-
+                Color color = Color.black;
                 if (i >= 0 && i < mapManager.masterMap.Length)
                 {
                     MapField field = mapManager.masterMap[i];
-                    minimapPix[pixIndex] = BiomeTexureColor(field.MainBiome);
+                    color = BiomeTexureColor(field.MainBiome);
+                    if (field.Modifier.ContainsKey("River"))
+                        color = Color.cyan;
                     if (pos == worldPos)
-                    {
-                        minimapPix[pixIndex] = Color.red;
-                    }
+                        color = Color.red;
                 }
-                else
-                {
-                    minimapPix[pixIndex] = Color.black;
-                }
+                minimapPix[pixIndex] = color;
                 pixIndex++;
             }
         }

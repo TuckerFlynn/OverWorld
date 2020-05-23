@@ -210,7 +210,6 @@ public class WorldGenerator : MonoBehaviour {
         biomeKey.Add(98, "tropicalJungle");
         biomeKey.Add(99, "tropicalJungle");
     }
-
     // Primary function for defining initial global temperatures and precipitations
     void SurfaceGenMain()
     {
@@ -243,7 +242,6 @@ public class WorldGenerator : MonoBehaviour {
             y++;
         }
     }
-
     // Run Hikers to create mountain ranges
     void HeightMapGen()
     {
@@ -331,19 +329,12 @@ public class WorldGenerator : MonoBehaviour {
             p = 0;
         }
     }
-
     // Get an endpoint of a vector from a random angle and magnitude, clamped to the map boundaries
     Vector2Int HikerRange (Vector2Int start, int length, float angle) {
         int x = Mathf.RoundToInt(Mathf.Clamp(start.x + length * Mathf.Cos(angle), 1.0f, worldSize-1));
         int y = Mathf.RoundToInt(Mathf.Clamp(start.y + length * Mathf.Sin(angle), 1.0f, worldSize-1));
         return new Vector2Int(x, y);
     }
-
-    // Convert a Vector2Int map coordinate to the corresponding field index
-    int CoordToId (Vector2Int coord) {
-        return Mathf.RoundToInt(coord.y * worldSize + coord.x);
-    }
-
     // Expands areas of elevations around peaks to create a heightmap
     Peak ElevationStep (Peak peak) {
         Peak tempPeak = peak;
@@ -379,8 +370,7 @@ public class WorldGenerator : MonoBehaviour {
         tempPeak.StepCount++;
         return tempPeak;
     }
-
-    // Adjust temperature and precipitation values based on elevation and latitude (y-value) values must be clamped between 0.0-1.0
+    // Adjust temperature and precipitation values based on elevation and latitude (y-value); values must be clamped between 0.0-1.0
     void ElevLatAdjustment () {
         int i = 0;
         while (i < map.Length) {
@@ -447,7 +437,7 @@ public class WorldGenerator : MonoBehaviour {
         int seedAttempts = 0;
         while (swimCount > 0 && seedAttempts < swimmerCount * 100) {
             // The starting point of the Swimmer is set with a random (x,y) coordinate similar to the Hikers
-            Vector2Int start = new Vector2Int(hash.Range(0, worldSize, h + 1), hash.Range(0, worldSize, h + 2));
+            Vector2Int start = new Vector2Int(hash.Range(5, worldSize - 10, h + 1), hash.Range(5, worldSize - 10, h + 2));
             // Crude (but still fast enough) method to find starting points with a high elevation
             if (map[CoordToId(start)].Elevation > 0.8f) {
                 object[] river = { 0.01f };
@@ -461,7 +451,15 @@ public class WorldGenerator : MonoBehaviour {
                     if (CoordToId(pos) < 0 || CoordToId(pos) > map.Length) {
                         break;
                     }
-                    map[CoordToId(pos)].AddMod("River", river);
+                    bool success = map[CoordToId(pos)].AddMod("River", river);
+
+                    if (!success)
+                    {
+                        Debug.Log("FOUND A FORD");
+                        map[CoordToId(pos)].AddMod("Ford", river);
+                        break;
+                    }
+
                     strokeLim++;
                 }
                 swimCount--;
@@ -489,16 +487,20 @@ public class WorldGenerator : MonoBehaviour {
             new Vector2Int(1,1)
         };
         // Loop through surrounding fields, saving the lowest elevation
-        int i = 0;
-        while (i < neighbours.Length) {
+        int initial = Random.Range(0, neighbours.Length);
+        int i = initial;
+        while (i < initial + neighbours.Length) {
+            // Neighbours array is looped through from a random point to avoid straight lines
+            int index = i % neighbours.Length;
             // Skip coords outside the map limits
-            if (CoordToId(pos + neighbours[i]) < 0 || CoordToId(pos + neighbours[i]) > (map.Length - 1)) {
+            if (CoordToId(pos + neighbours[index]) < 0 || CoordToId(pos + neighbours[index]) > (map.Length - 1)) {
                 i++;
                 continue;
             }
-            if (map[CoordToId(pos + neighbours[i])].Elevation < lowElevation) {
-                lowElevation = map[CoordToId(pos + neighbours[i])].Elevation;
-                lowField = neighbours[i];
+
+            if (map[CoordToId(pos + neighbours[index])].Elevation < lowElevation) {
+                lowElevation = map[CoordToId(pos + neighbours[index])].Elevation;
+                lowField = neighbours[index];
             }
             i++;
         }
@@ -526,8 +528,13 @@ public class WorldGenerator : MonoBehaviour {
 
             surfacePix[i] = biomeColor;
 
-            if (map[i].Modifier.ContainsKey("River")) {
+            if (map[i].Modifier.ContainsKey("River"))
+            {
                 surfacePix[i] = Color.cyan; 
+            }
+            if (map[i].Modifier.ContainsKey("Ford"))
+            {
+                surfacePix[i] = Color.blue;
             }
 
             heightPix[i] = new Color(map[i].Elevation, map[i].Elevation, map[i].Elevation);
@@ -543,6 +550,12 @@ public class WorldGenerator : MonoBehaviour {
         // Re-enable images
         biomeImage.enabled = true;
         heightImage.enabled = true;
+    }
+
+    // Convert a Vector2Int map coordinate to the corresponding field index
+    int CoordToId(Vector2Int coord)
+    {
+        return Mathf.RoundToInt(coord.y * worldSize + coord.x);
     }
 
     Color BiomeTexureColor(string biome)

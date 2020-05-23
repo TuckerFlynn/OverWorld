@@ -11,7 +11,7 @@ using UnityEngine.UI;
 public class DungeonMaster : MonoBehaviour
 {
     public static DungeonMaster dungeonMaster;
-    public CharacterManager charMngr;
+    CharacterManager charMngr;
 
     public DungeonGenerator dunGen;
     public DungeonResources dunResources;

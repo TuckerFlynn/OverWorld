@@ -6,11 +6,17 @@ using UnityEngine.EventSystems;
 
 public class RightClickMenu : MonoBehaviour
 {
-    public InventoryManager invenMgr;
+    InventoryManager invenMngr;
     public BuildingSystem buildSystem;
     public IngameMenu ingameMenu;
     public string source;
     public int index;
+
+
+    private void Start()
+    {
+        invenMngr = InventoryManager.inventoryManager;
+    }
 
     void Update()
     {
@@ -23,17 +29,38 @@ public class RightClickMenu : MonoBehaviour
 
     public void Drop ()
     {
-        int q = invenMgr.GetInvenByString<InvenItem[]>(source)[index].Quantity;
-        invenMgr.DropItem(index, source, q);
+        int q = invenMngr.GetInvenByString<InvenItem[]>(source)[index].Quantity;
+        invenMngr.DropItem(index, source, q);
     }
 
     public void Use()
     {
-        Item item = invenMgr.GetInvenByString<InvenItem[]>(source)[index].Item;
+        Item item = invenMngr.GetInvenByString<InvenItem[]>(source)[index].Item;
         if (item is Building building)
         {
             ingameMenu.HideAllUI();
             buildSystem.StartBuild(source, index, building);
+        }
+        if (item is Consumable consumable)
+        {
+            // Remove item from inventory
+            invenMngr.RemoveFromInventory(source, index);
+            // Apply effects
+            for (int i = 0; i < consumable.Effects.Count; i++)
+            {
+                StatusEffect effect = consumable.Effects[i];
+                if (effect.Status == "hunger")
+                {
+                    if (effect.Discrete)
+                    {
+                        HungerManager.hungerManager.HungerDiscrete(effect.Effect);
+                    }
+                    else
+                    {
+                        HungerManager.hungerManager.HungerRate(effect.Effect, effect.Time);
+                    }
+                }
+            }
         }
     }
 }

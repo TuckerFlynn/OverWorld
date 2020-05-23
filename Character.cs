@@ -52,6 +52,7 @@ public class Character
 
         maxHealth = 100;
         health = 100;
+        hunger = 100;
     }
 }
 /// <summary>

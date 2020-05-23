@@ -44,12 +44,20 @@ public class MapField {
 
     public Dictionary<string, object[]> Modifier = new Dictionary<string, object[]>();
 
-    public void AddMod (string mod, params object[] obj) {
+    /// <summary>
+    /// Add a modifier to the map field; Returned value indicates whether the modifier has been successfully added or not 
+    /// </summary>
+    /// <param name="mod">Modifier name</param>
+    /// <param name="obj">Array of different values used by field generators</param>
+    /// <returns></returns>
+    public bool AddMod (string mod, params object[] obj) {
         // Check the Modifiers dict does not already contain the modifier being added
         if (!Modifier.ContainsKey(mod)) {
             Modifier.Add(mod, obj);
+            return true;
         } else {
             //Debug.LogWarning("Key '" + mod + "' is already used @ " + Position);
+            return false;
         }
     }
 }

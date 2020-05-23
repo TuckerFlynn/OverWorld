@@ -36,7 +36,8 @@ public class IngameMenu : MonoBehaviour
     {
         HUD.SetActive(true);
         HideAllUI();
-        logger = GameObject.Find("Logger");
+        if (logger == null)
+            logger = GameObject.Find("Logger");
     }
 
     void Update()
@@ -170,6 +171,8 @@ public class IngameMenu : MonoBehaviour
         }
         //Destroy(CharacterManager.characterManager.gameObject);
         //Destroy(MapManager.mapManager.gameObject);
+        MapManager.mapManager.SaveFieldFile(MapManager.mapManager.worldPos);
+
         SceneManager.LoadSceneAsync("MainMenu_2");
     }
 
