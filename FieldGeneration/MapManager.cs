@@ -211,7 +211,7 @@ public class MapManager : MonoBehaviour
         File.WriteAllText(path, json);
 
         // --- SAVE THE GAMEOBJECT DATA HERE
-        TileDataLoader.tileDataLoader.SaveTileData();
+        TileDataLoader.tileDataLoader.SaveTileData(worldPos);
     }
 
     public void LoadFieldFile(Vector2Int pos)
@@ -273,7 +273,7 @@ public class MapManager : MonoBehaviour
         }
 
         // LOAD THE GAMEOBJECT DATA HERE?
-        TileDataLoader.tileDataLoader.LoadTileData();
+        TileDataLoader.tileDataLoader.LoadTileData(worldPos);
     }
 
     // Load the world map from file

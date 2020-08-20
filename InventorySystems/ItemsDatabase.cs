@@ -33,7 +33,10 @@ public class ItemsDatabase : MonoBehaviour
             {
                 KnownTypes = new List<Type> { typeof(Item), typeof(Mainhand), typeof(Consumable), typeof(Building) }
             };
+
+            // The imnportant bit! Deserialize list of objects into the appropriate classes
             Item[] items = JsonConvert.DeserializeObject<Item[]>(JsonIn, new JsonSerializerSettings
+
             {
                 TypeNameHandling = TypeNameHandling.Objects,
                 SerializationBinder = binder

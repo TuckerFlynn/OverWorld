@@ -19,7 +19,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     void Start()
     {
         invenMgr = FindObjectOfType<InventoryManager>();
-        if (source == "Inventory")
+        if (source == "Inventory" || source == "Container")
         {
             Transform grandParent = transform.parent.parent;
             int childCount = grandParent.childCount;
@@ -27,7 +27,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             {
                 if (this.transform.IsChildOf(grandParent.GetChild(i)))
                 {
-                    this.index = i;
+                    index = i;
                 }
             }
         }
@@ -67,7 +67,8 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (!RectTransformUtility.RectangleContainsScreenPoint(invenPanel, eventData.position))
         {
             int q = invenMgr.GetInvenByString<InvenItem[]>(source)[index].Quantity;
-            if (Input.GetKey(KeyCode.LeftShift)) q = Mathf.FloorToInt(q / 2);
+            if (Input.GetKey(KeyCode.LeftShift))
+                q = Mathf.FloorToInt(q / 2);
 
             Debug.Log("Dropped " + q + " of " + invenMgr.GetInvenByString<InvenItem[]>(source)[index].Item + " on the ground!");
             invenMgr.DropItem(index, source, q);

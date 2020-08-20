@@ -13,7 +13,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler
     void Start()
     {
         invenMgr = FindObjectOfType<InventoryManager>();
-        if (receiver == "Inventory")
+        if (receiver == "Inventory" || receiver == "Container")
         {
             Transform parent = transform.parent;
             int childCount = parent.childCount;
@@ -21,7 +21,7 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler
             {
                 if (this.transform == parent.GetChild(i))
                 {
-                    this.index = i;
+                    index = i;
                 }
             }
         }

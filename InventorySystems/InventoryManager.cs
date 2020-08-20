@@ -24,9 +24,12 @@ public class InventoryManager : MonoBehaviour
     /// By index: 0=Legs, 1=Chest, 2=Head, 3=Mainhand, 4=Offhand, 5=Amulet, 6=Backpack
     /// </summary>
     public InvenItem[] Equipment = new InvenItem[7];
+    // This is set whenever a container of some kind is opened
+    public InvenItem[] Container;
+
     public InvenSortType invenSortType;
 
-    [Header("Inven UI elements")]
+    [Header("INVENTORY UI ELEMENTS")]
     public GameObject invenCanvas;
     public GameObject invenPanelHolder;
     private GameObject[] invenPanels;
@@ -34,8 +37,10 @@ public class InventoryManager : MonoBehaviour
     public GameObject rightClickMenu;
     public Image[] equipImages;
     public Image[] characterImages;
+    [Header("CONTAINER UI ELEMENTS")]
+    public GameObject containerSlotParent;
 
-    [Header("Dropped item prefab")]
+    [Header("DROPPED ITEM PREFAB")]
     public GameObject itemPrefab;
 
     // Public actions!
@@ -47,7 +52,6 @@ public class InventoryManager : MonoBehaviour
             inventoryManager = this;
         else if (inventoryManager != this)
             Destroy(this.gameObject);
-
     }
 
     private void Start()
@@ -135,7 +139,10 @@ public class InventoryManager : MonoBehaviour
                     {
                         builder.AppendLine();
                         builder.Append("<size=6><color='red'>");
-                        builder.Append(consumable.Effects[0].Status).Append(": ").Append(consumable.Effects[0].Effect);
+                        if (consumable.Effects[0].Discrete)
+                            builder.Append(consumable.Effects[0].Status).Append(": ").Append(consumable.Effects[0].Effect);
+                        else
+                            builder.Append(consumable.Effects[0].Status).Append(" rate: ").Append(consumable.Effects[0].Effect);
                         builder.Append("</color></size>");
                     }
 
@@ -450,10 +457,11 @@ public class InventoryManager : MonoBehaviour
             }
         }
         // Refresh the UI
-        if (refreshUI) RefreshInvenUI();
+        if (refreshUI)
+            RefreshInvenUI();
         return success;
     }
-    // Remove items from inventory without dropping the object (ie. when selling or crafting); starts removing from the last inventory slot
+    // Remove items from inventory w/o dropping the object (ie. when selling or crafting); starts removing from the last inventory slot
     public bool RemoveFromInventory(int id, int quantity, bool refreshUI = true)
     {
         bool success = false;
@@ -536,7 +544,6 @@ public class InventoryManager : MonoBehaviour
 
         if (refreshUI) RefreshInvenUI();
     }
-
     // Sort the item depending on the current sorting type
     public void SortInven()
     {
@@ -548,7 +555,7 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("sorting by type has not been implemented");
+            Debug.Log("Sorting by type has not been implemented");
         }
 
         RefreshInvenUI();

@@ -36,8 +36,8 @@ public class IngameMenu : MonoBehaviour
     {
         HUD.SetActive(true);
         HideAllUI();
-        if (logger == null)
-            logger = GameObject.Find("Logger");
+        //if (logger == null)
+        //    logger = GameObject.Find("Logger");
     }
 
     void Update()
@@ -45,10 +45,8 @@ public class IngameMenu : MonoBehaviour
         // Prevents normal key actions while the logger input field is active
         if (logger != null)
         {
-            if (logger.GetComponentInChildren<InputField>().enabled)
-            {
+            if (logger.GetComponentInChildren<InputField>().isFocused)
                 return;
-            }
         }
         // Prevent key actions when the crafting search bar is focused
         if (craftSearch.isFocused)
