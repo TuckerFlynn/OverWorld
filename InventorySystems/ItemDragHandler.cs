@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    private InventoryManager invenMgr;
+    InvenManager2 invenMgr;
 
     public string source = "Inventory";
     public int index;
@@ -14,11 +14,11 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     private Vector3 originalPosition;
     private Transform originalParent;
-    private RectTransform invenPanel;
+    private RectTransform UIPanel;
 
     void Start()
     {
-        invenMgr = FindObjectOfType<InventoryManager>();
+        invenMgr = InvenManager2.invenManager2;
         if (source == "Inventory" || source == "Container")
         {
             Transform grandParent = transform.parent.parent;
@@ -40,11 +40,11 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         originalParent = transform.parent;
 
         Transform topParent = transform;
-        while ( !topParent.gameObject.name.Equals("InventoryOverview") )
+        while ( !topParent.gameObject.name.Equals("InventoryOverview") && !topParent.gameObject.name.Equals("ContainerOverview"))
         {
             topParent = topParent.parent;
         }
-        invenPanel = topParent as RectTransform;
+        UIPanel = topParent as RectTransform;
         transform.SetParent(topParent);
         transform.SetAsLastSibling();
     }
@@ -64,15 +64,16 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         transform.position = originalPosition;
 
         // Check if the item has been dropped outside of the inventory window
-        if (!RectTransformUtility.RectangleContainsScreenPoint(invenPanel, eventData.position))
+        if (!RectTransformUtility.RectangleContainsScreenPoint(UIPanel, eventData.position))
         {
             int q = invenMgr.GetInvenByString<InvenItem[]>(source)[index].Quantity;
             if (Input.GetKey(KeyCode.LeftShift))
                 q = Mathf.FloorToInt(q / 2);
 
             Debug.Log("Dropped " + q + " of " + invenMgr.GetInvenByString<InvenItem[]>(source)[index].Item + " on the ground!");
-            invenMgr.DropItem(index, source, q);
-            invenMgr.UpdateCharPreview();
+            invenMgr.DropItem(q, source, index);
+            invenMgr.RefreshMainInvenUI();
+            invenMgr.RefreshCharacterPreview();
         }
     }
 

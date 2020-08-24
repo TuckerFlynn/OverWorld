@@ -9,12 +9,12 @@ public class PlayerControl : MonoBehaviour
     bool inputUse = false;
 
     CharacterManager charMngr;
-    InventoryManager invenMngr;
+    InvenManager2 invenMngr;
 
     private void Start()
     {
         charMngr = CharacterManager.characterManager;
-        invenMngr = FindObjectOfType<InventoryManager>();
+        invenMngr = InvenManager2.invenManager2;
     }
 
     // Update is called once per frame
@@ -82,11 +82,16 @@ public class PlayerControl : MonoBehaviour
             for (int i = 0; i < groundItem.Quantity; i++)
             {
                 // Add to inven returns false if there is no space
-                if (invenMngr.AddToInventory(groundItem.ID))
+                if (invenMngr.AddItem(groundItem.ID, 1, "Inventory"))
                 {
                     added++;
                 }
+                else
+                {
+                    break;
+                }
             }
+
             if (added == groundItem.Quantity)
                 Destroy(col.gameObject);
             else

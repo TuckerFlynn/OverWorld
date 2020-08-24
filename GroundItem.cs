@@ -9,7 +9,7 @@ public class GroundItem : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        // If player collides with an item on the ground
+        // If two of the same items on the ground are overlapping, combine them into one stack
         if (col.gameObject.TryGetComponent<GroundItem>(out GroundItem groundItem))
         {
             if(this.ID == groundItem.ID)

@@ -9,7 +9,7 @@ public class CraftingManager : MonoBehaviour
     public static CraftingManager craftingManager;
 
     ItemsDatabase itemDB;
-    public InventoryManager invenMngr;
+    InvenManager2 invenMngr;
     CraftingDatabase craftingDB;
 
     [Header("Info Panel")]
@@ -44,6 +44,7 @@ public class CraftingManager : MonoBehaviour
     {
         itemDB = ItemsDatabase.itemsDatabase;
         craftingDB = CraftingDatabase.craftingDatabase;
+        invenMngr = InvenManager2.invenManager2;
 
         availableStations.Add(0);
 
@@ -297,12 +298,9 @@ public class CraftingManager : MonoBehaviour
         // Remove inputs from the inventory and add the output
         foreach (CraftInput input in activeRecipe.Inputs)
         {
-            bool remove = invenMngr.RemoveFromInventory(input.ID, input.Quantity * amount, false);
+            bool remove = invenMngr.RemoveItemById(input.ID, input.Quantity * amount, "Inventory");
         }
-        for (int a = 0; a < activeRecipe.OutputQuantity * amount; a++)
-        {
-            invenMngr.AddToInventory(activeRecipe.OutputID);
-        }
+        invenMngr.AddItem(activeRecipe.OutputID, amount, "Inventory");
 
         UpdateRecipeButtons();
         RefreshUI();

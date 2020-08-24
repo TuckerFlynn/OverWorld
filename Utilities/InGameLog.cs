@@ -13,7 +13,7 @@ public class InGameLog : MonoBehaviour
     public InputField commandLine;
     private List<string> logList = new List<string>();
 
-    private InventoryManager invenMngr;
+    InvenManager2 invenMngr;
 
     public Tilemap[] maps;
 
@@ -32,6 +32,11 @@ public class InGameLog : MonoBehaviour
         }
 
         commandLine.enabled = false;
+    }
+
+    private void Start()
+    {
+        invenMngr = InvenManager2.invenManager2;
     }
 
     private void Update()
@@ -98,8 +103,6 @@ public class InGameLog : MonoBehaviour
         // Command to add items to inven: 'additem <ID> <Quantity>'
         if (command.StartsWith("additem", System.StringComparison.OrdinalIgnoreCase))
         {
-            invenMngr = InventoryManager.inventoryManager;
-
             string[] s = command.Split(' ');
             if (s.Length < 3 || s.Length > 3)
             {
@@ -108,10 +111,8 @@ public class InGameLog : MonoBehaviour
             }
             if (invenMngr != null)
             {
-                for(int i = 0; i < int.Parse(s[2]); i++)
-                {
-                    invenMngr.AddToInventory(int.Parse(s[1]));
-                }
+                invenMngr.AddItem(int.Parse(s[1]), int.Parse(s[2]), "Inventory");
+                invenMngr.RefreshMainInvenUI();
             }
             return;
         }

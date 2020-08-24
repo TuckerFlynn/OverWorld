@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Inventory;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -13,6 +14,8 @@ public class TileDataLoader : MonoBehaviour
 
     public Tilemap Objects;
 
+    public GameobjectData[] fieldDataArray;
+
     private void Awake()
     {
         if (tileDataLoader == null)
@@ -20,7 +23,7 @@ public class TileDataLoader : MonoBehaviour
         else if (tileDataLoader != this)
             Destroy(this);
 
-        // Check for the dungeons file directory
+        // Check for the configs file directory
         if (!Directory.Exists(Application.persistentDataPath + "/Fields/Configs"))
         {
             Directory.CreateDirectory(Application.persistentDataPath + "/Fields/Configs");
@@ -52,7 +55,7 @@ public class TileDataLoader : MonoBehaviour
                 {
                     X = Mathf.FloorToInt(child.position.x),
                     Y = Mathf.FloorToInt(child.position.y),
-                    Items = containerTile.Items
+                    Items = InvenManager2.invenManager2.ToBasicInven(containerTile.Items)
                 };
 
                 dataList.Add(toAdd);
@@ -91,7 +94,7 @@ public class TileDataLoader : MonoBehaviour
             // Allows deserializing into multiple classes based on the $type value in the Json file
             TypeNameSerializationBinder binder = new TypeNameSerializationBinder
             {
-                KnownTypes = new List<Type> { typeof(GameobjectData), typeof(PlantData), typeof(ContainerData) }
+                KnownTypes = new List<Type> { typeof(GameobjectData), typeof(PlantData), typeof(ContainerData), typeof(BasicInvenItem) }
             };
             // The imnportant bit! Deserialize list of objects into the appropriate classes
             dataArray = JsonConvert.DeserializeObject<GameobjectData[]>(JsonIn, new JsonSerializerSettings
@@ -117,17 +120,61 @@ public class TileDataLoader : MonoBehaviour
 
                     }
                 }
-                else if (child.TryGetComponent<ContainerTile>(out ContainerTile containerTile))
+                //else if (child.TryGetComponent<ContainerTile>(out ContainerTile containerTile))
+                //{
+                //    foreach (GameobjectData objData in dataArray)
+                //    {
+                //        if (objData is ContainerData containerData)
+                //        {
+                //            if (containerData.X == Mathf.FloorToInt(child.position.x) && containerData.Y == Mathf.FloorToInt(child.position.y))
+                //            {
+                //                for (int i = 0; i < containerData.Items.Length; i++)
+                //                {
+                //                    containerTile.Items[i] = containerData.Items[i];
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
+            }
+        }
+    }
+
+    public void LoadFieldData(Vector2Int pos)
+    {
+        string path = Application.persistentDataPath + "/Fields/Configs/" + pos.x + "_" + pos.y + ".config";
+        if (File.Exists(path))
+        {
+            string JsonIn = File.ReadAllText(path);
+            // Allows deserializing into multiple classes based on the $type value in the Json file
+            TypeNameSerializationBinder binder = new TypeNameSerializationBinder
+            {
+                KnownTypes = new List<Type> { typeof(GameobjectData), typeof(PlantData), typeof(ContainerData), typeof(BasicInvenItem) }
+            };
+            // The imnportant bit! Deserialize list of objects into the appropriate classes
+            fieldDataArray = JsonConvert.DeserializeObject<GameobjectData[]>(JsonIn, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Objects,
+                SerializationBinder = binder
+            });
+        }
+    }
+
+    public void FetchContainerData(ContainerTile containerTile, Vector2Int pos)
+    {
+        foreach (GameobjectData gameobjectData in fieldDataArray)
+        {
+            if (gameobjectData is ContainerData containerData)
+            {
+                if (containerData.X == pos.x && containerData.Y == pos.y)
                 {
-                    foreach (GameobjectData objData in dataArray)
+                    for (int i = 0; i < containerData.Items.Length; i++)
                     {
-                        if (objData is ContainerData containerData)
+                        containerTile.Items[i] = new InvenItem
                         {
-                            if (containerData.X == Mathf.FloorToInt(child.position.x) && containerData.Y == Mathf.FloorToInt(child.position.y))
-                            {
-                                containerTile.Items = containerData.Items;
-                            }
-                        }
+                            Item = ItemsDatabase.itemsDatabase.GetItem(containerData.Items[i].ID),
+                            Quantity = containerData.Items[i].Quantity
+                        };
                     }
                 }
             }
@@ -159,7 +206,7 @@ public class PlantData : GameobjectData
 [Serializable]
 public class ContainerData : GameobjectData
 {
-    public InvenItem[] Items;
+    public BasicInvenItem[] Items;
 
     public ContainerData()
     {

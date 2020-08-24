@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 [Serializable]
@@ -15,7 +16,11 @@ public class Character
     public int[] equipment = new int[7];
     public BasicInvenItem[] inventory = new BasicInvenItem[66];
     public int bodyIndex;
+    [JsonIgnore]
+    public Sprite bodySprite;
     public int hairIndex;
+    [JsonIgnore]
+    public Sprite hairSprite;
 
     // Default both positions to outside the map, indicating a new player
     public Vector2IntJson worldPos = new Vector2IntJson(-1, -1);

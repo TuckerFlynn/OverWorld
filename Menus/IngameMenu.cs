@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class IngameMenu : MonoBehaviour
 {
-    [Header("IngameMain")]
+    [Header("IN-GAME MAIN MENU")]
     public GameObject escapeMenu;
     public GameObject[] disableOnQuit;
     public GameObject settingsMenu;
@@ -18,7 +18,7 @@ public class IngameMenu : MonoBehaviour
     Texture2D minimapTex;
     public int zoom = 10;
     // GUI objects and related values
-    [Header("UI")]
+    [Header("UI PANELS")]
     public GameObject UI;
     public GameObject inventory;
     public GameObject crafting;
@@ -26,7 +26,8 @@ public class IngameMenu : MonoBehaviour
     public GameObject skills;
     public GameObject mineEntranceUI;
     public GameObject logger;
-    [Header("Tabs")]
+    public GameObject container;
+    [Header("MAIN UI TABS")]
     public GameObject tabs;
     public Toggle invenTab;
     public Toggle craftTab;
@@ -54,13 +55,9 @@ public class IngameMenu : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (inventory.activeSelf || crafting.activeSelf || skills.activeSelf || mineEntranceUI.activeSelf)
+            if (inventory.activeSelf || crafting.activeSelf || skills.activeSelf || mineEntranceUI.activeSelf || container.activeSelf)
             {
-                inventory.SetActive(false);
-                crafting.SetActive(false);
-                skills.SetActive(false);
-                tabs.SetActive(false);
-                mineEntranceUI.SetActive(false);
+                HideAllUI();
             }
             else
             {
@@ -79,11 +76,15 @@ public class IngameMenu : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.I))
         {
             inventory.SetActive(!inventory.activeSelf);
+            InvenManager2.invenManager2.RefreshMainInvenUI();
+            InvenManager2.invenManager2.RefreshCharacterPreview();
             // Disable other UI windows
-            if (crafting.activeSelf || skills.activeSelf)
+            if (crafting.activeSelf || skills.activeSelf || container.activeSelf)
             {
                 crafting.SetActive(false);
                 skills.SetActive(false);
+                if (InvenManager2.invenManager2.activeContainer != null)
+                    InvenManager2.invenManager2.activeContainer.CloseContainer();
             }
             if (!inventory.activeSelf && !crafting.activeSelf && !skills.activeSelf)
             {
@@ -99,10 +100,12 @@ public class IngameMenu : MonoBehaviour
         {
             crafting.SetActive(!crafting.activeSelf);
             // Disable other UI windows
-            if (inventory.activeSelf || skills.activeSelf)
+            if (inventory.activeSelf || skills.activeSelf || container.activeSelf)
             {
                 inventory.SetActive(false);
                 skills.SetActive(false);
+                if (InvenManager2.invenManager2.activeContainer != null)
+                    InvenManager2.invenManager2.activeContainer.CloseContainer();
             }
             if (!inventory.activeSelf && !crafting.activeSelf && !skills.activeSelf)
             {
@@ -118,10 +121,12 @@ public class IngameMenu : MonoBehaviour
         {
             skills.SetActive(!skills.activeSelf);
             // Disable other UI windows
-            if (inventory.activeSelf || crafting.activeSelf)
+            if (inventory.activeSelf || crafting.activeSelf || container.activeSelf)
             {
                 inventory.SetActive(false);
                 crafting.SetActive(false);
+                if (InvenManager2.invenManager2.activeContainer != null)
+                    InvenManager2.invenManager2.activeContainer.CloseContainer();
             }
             if (!inventory.activeSelf && !crafting.activeSelf && !skills.activeSelf)
             {
@@ -203,5 +208,8 @@ public class IngameMenu : MonoBehaviour
         skills.SetActive(false);
         tabs.SetActive(false);
         mineEntranceUI.SetActive(false);
+        container.SetActive(false);
+        if (InvenManager2.invenManager2.activeContainer != null)
+            InvenManager2.invenManager2.activeContainer.CloseContainer();
     }
 }

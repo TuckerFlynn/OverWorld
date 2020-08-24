@@ -15,14 +15,15 @@ public class CharacterManager : MonoBehaviour
 {
     public static CharacterManager characterManager;
 
-    ItemsDatabase itemDB;
+    ItemsDatabase itemsDB;
+    InvenManager2 invenMngr;
 
     public GameObject charObject;
     public Vector3 surfacePos;
     public bool InDungeon;
 
-    public Sprite[] bodySprites;
-    public Sprite[] hairSprites;
+    //public Sprite[] bodySprites;
+    //public Sprite[] hairSprites;
 
     public Character activeChar;
     public HUDBars hudBars;
@@ -39,16 +40,14 @@ public class CharacterManager : MonoBehaviour
         else if (characterManager != this)
             Destroy(this);
 
-        bodySprites = Resources.LoadAll<Sprite>("Sprites/Character/body");
-        hairSprites = Resources.LoadAll<Sprite>("Sprites/Character/hair");
-
         charObject.SetActive(false);
         LoadCharacter();
     }
 
     private void Start()
     {
-        itemDB = ItemsDatabase.itemsDatabase;
+        itemsDB = ItemsDatabase.itemsDatabase;
+        invenMngr = InvenManager2.invenManager2;
     }
 
     private void OnDisable()
@@ -77,19 +76,23 @@ public class CharacterManager : MonoBehaviour
         {
             activeChar = LoadParameters.loadParameters.activeChar;
         }
+
+        activeChar.bodySprite = Resources.LoadAll<Sprite>("Sprites/Character/body")[activeChar.bodyIndex];
+        activeChar.hairSprite = Resources.LoadAll<Sprite>("Sprites/Character/hair")[activeChar.hairIndex];
+
         charObject.transform.position = new Vector3(activeChar.fieldPos.x, activeChar.fieldPos.y, 0.0f);
     }
     // Refresh character sprites (frequently called from InventoryManager)
     public void UpdateCharacter()
     {
         SpriteRenderer[] rends = charObject.GetComponentsInChildren<SpriteRenderer>();
-        rends[1].sprite = bodySprites[activeChar.bodyIndex];
-        rends[2].sprite = itemDB.GetItem(activeChar.equipment[0]).Sprite; // legs
-        rends[3].sprite = itemDB.GetItem(activeChar.equipment[1]).Sprite; // chest
-        rends[4].sprite = hairSprites[activeChar.hairIndex];
-        rends[5].sprite = itemDB.GetItem(activeChar.equipment[2]).Sprite; // head
-        rends[6].sprite = itemDB.GetItem(activeChar.equipment[3]).Sprite; // mainhand
-        rends[7].sprite = itemDB.GetItem(activeChar.equipment[4]).Sprite; // offhand
+        rends[1].sprite = activeChar.bodySprite;
+        rends[2].sprite = invenMngr.Equipment[0].Item.Sprite; // legs
+        rends[3].sprite = invenMngr.Equipment[1].Item.Sprite; // chest
+        rends[4].sprite = activeChar.hairSprite;
+        rends[5].sprite = invenMngr.Equipment[2].Item.Sprite; // head
+        rends[6].sprite = invenMngr.Equipment[3].Item.Sprite; // mainhand
+        rends[7].sprite = invenMngr.Equipment[4].Item.Sprite; // offhand
         charObject.SetActive(true);
     }
     // Overwrite the character save with updated values

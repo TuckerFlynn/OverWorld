@@ -156,8 +156,8 @@ public class InventoryManager : MonoBehaviour
     void LoadInvenUI()
     {
         // Load unchanging character sprites
-        characterImages[0].sprite = charMngr.bodySprites[charMngr.activeChar.bodyIndex];
-        characterImages[3].sprite = charMngr.hairSprites[charMngr.activeChar.hairIndex];
+        characterImages[0].sprite = charMngr.activeChar.bodySprite;
+        characterImages[3].sprite = charMngr.activeChar.hairSprite;
         // Load the array of active equipment and refresh the sprites
         for (int i = 0; i < Equipment.Length; i++)
         {
@@ -544,22 +544,6 @@ public class InventoryManager : MonoBehaviour
 
         if (refreshUI) RefreshInvenUI();
     }
-    // Sort the item depending on the current sorting type
-    public void SortInven()
-    {
-        int sortType = invenSortType.sortType;
-
-        if (sortType == 1)
-        {
-            Array.Sort(Inventory);
-        }
-        else
-        {
-            Debug.Log("Sorting by type has not been implemented");
-        }
-
-        RefreshInvenUI();
-    }
 
     /// <summary>
     /// Check if the inventory contains at least the specified amount of an item; checking for item id = 0 will always return true
@@ -614,14 +598,4 @@ public class InventoryManager : MonoBehaviour
         }
         return output;
     }
-}
-/// <summary>
-/// Simplified version of InvenItem that only contains ID and Quantity;
-/// *note this will have to be changed once unique items are introduced*
-/// </summary>
-[Serializable]
-public class BasicInvenItem
-{
-    public int ID { get; set; }
-    public int Quantity { get; set; }
 }

@@ -5,14 +5,15 @@ using UnityEngine.EventSystems;
 
 public class ItemDropHandler : MonoBehaviour, IDropHandler
 {
-    private InventoryManager invenMgr;
+    private InvenManager2 invenMgr;
 
     public string receiver = "Inventory";
     public int index;
 
     void Start()
     {
-        invenMgr = FindObjectOfType<InventoryManager>();
+        invenMgr = InvenManager2.invenManager2;
+
         if (receiver == "Inventory" || receiver == "Container")
         {
             Transform parent = transform.parent;
@@ -37,7 +38,20 @@ public class ItemDropHandler : MonoBehaviour, IDropHandler
 
             itemDragHandler.ForceEndDrag();
 
-            invenMgr.MoveItemsInternal(itemDragHandler.index, itemDragHandler.source, index, receiver);
+            int q = invenMgr.GetInvenByString<InvenItem[]>(itemDragHandler.source)[itemDragHandler.index].Quantity;
+            if (Input.GetKey(KeyCode.LeftShift))
+                q = Mathf.FloorToInt(q / 2);
+
+            invenMgr.MoveItems(itemDragHandler.source, itemDragHandler.index, receiver, index, q);
+            if (invenMgr.inventoryOverview.activeSelf)
+            {
+                invenMgr.RefreshMainInvenUI();
+                invenMgr.RefreshCharacterPreview();
+            }
+            else
+            {
+                invenMgr.RefreshContainerInvenUI();
+            }
         }
     }
 }

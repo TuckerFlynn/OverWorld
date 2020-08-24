@@ -44,7 +44,6 @@ public class MapManager : MonoBehaviour
     {
         // Force character to reload when the mapManager is started
         charMngr = CharacterManager.characterManager;
-        charMngr.UpdateCharacter();
 
         masterMap = LoadWorld();
         worldSize = (int)Mathf.Sqrt(masterMap.Length);
@@ -274,6 +273,7 @@ public class MapManager : MonoBehaviour
 
         // LOAD THE GAMEOBJECT DATA HERE?
         TileDataLoader.tileDataLoader.LoadTileData(worldPos);
+        TileDataLoader.tileDataLoader.LoadFieldData(worldPos);
     }
 
     // Load the world map from file

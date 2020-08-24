@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MeleeHandler : MonoBehaviour
 {
-    public InventoryManager invenMngr;
+    InvenManager2 invenMngr;
 
     public float power = 2;
     public float powerBonus = 0;
@@ -16,7 +16,7 @@ public class MeleeHandler : MonoBehaviour
 
     private void Start()
     {
-        invenMngr = InventoryManager.inventoryManager;
+        invenMngr = InvenManager2.invenManager2;
 
         anim = GetComponent<Animator>();
         invenMngr.OnMainhandChange += UpdateMainhand;

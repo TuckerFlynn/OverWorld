@@ -31,16 +31,7 @@ public class PickupProp : MonoBehaviour
                 // Prevent repeat interactions
                 canInteract = false;
                 // Try to add <Quanity> of <ItemID> to the character's inventory
-                bool success = false;
-                for (int i = 0; i < Quantity; i++)
-                {
-                    success = InventoryManager.inventoryManager.AddToInventory(ItemID);
-                    if (!success)
-                    {
-                        Quantity -= i;
-                        break;
-                    }
-                }
+                bool success = InvenManager2.invenManager2.AddItem(ItemID, Quantity, "Inventory");
                 // If all items can be added, remove or replace the tile
                 if (success)
                 {
