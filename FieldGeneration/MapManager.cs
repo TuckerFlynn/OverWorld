@@ -42,23 +42,34 @@ public class MapManager : MonoBehaviour
 
     private void Start()
     {
+        // Ensure fields directory exists
+        if (!Directory.Exists(Application.persistentDataPath + "/Fields"))
+        {
+            Directory.CreateDirectory(Application.persistentDataPath + "/Fields");
+        }
+
         // Force character to reload when the mapManager is started
         charMngr = CharacterManager.characterManager;
 
         masterMap = LoadWorld();
         worldSize = (int)Mathf.Sqrt(masterMap.Length);
         worldPos = new Vector2Int( charMngr.activeChar.worldPos.x, charMngr.activeChar.worldPos.y );
+
+        // Newly created characters are identified by worldPos = -1, -1; this is otherwise impossible (or a bug)
         if (worldPos == new Vector2Int(-1,-1))
         {
-            // ** this will be changed to force new players to load in a grassland biome with starter prefab
+            // Random world position is assigned ...
             worldPos = new Vector2Int(Mathf.FloorToInt(Random.value * worldSize), Mathf.FloorToInt(Random.value * worldSize));
+            // ... player location is set ...
+            charMngr.activeChar.fieldPos = new Vector2Json(49, 15);
+            // ... and the "tutorial" map is loaded in
+            LoadField(worldPos, "TutorialMap");
         }
-        if (!Directory.Exists(Application.persistentDataPath + "/Fields"))
+        else
         {
-            Directory.CreateDirectory(Application.persistentDataPath + "/Fields");
+            LoadField(worldPos);
         }
         minimap = FindObjectOfType<OverworldMinimap>();
-        LoadField(worldPos);
     }
 
     //private void OnDisable()
@@ -71,9 +82,9 @@ public class MapManager : MonoBehaviour
     //}
 
     // Load a field from file or generate a new one
-    public void LoadField (Vector2Int pos)
+    public void LoadField (Vector2Int pos, string prefabMap = null)
     {
-        if (pos.x < 0 || pos.x > 63 || pos.y < 0 || pos.y > 63)
+        if (pos.x < 0 || pos.x > worldSize - 1 || pos.y < 0 || pos.y > worldSize - 1)
         {
             Debug.Log("Attempt to leave this world denied. (Requested field outside worldMap limits)");
             return;
@@ -99,20 +110,28 @@ public class MapManager : MonoBehaviour
             drops.Add(child.gameObject);
         drops.ForEach(drop => Destroy(drop));
 
-        // try to load the requested field from file
-        string file = worldPos.x + "_" + worldPos.y + ".json";
-        if (File.Exists(Application.persistentDataPath + "/Fields/" + file))
+        if (prefabMap == null)
         {
-            LoadFieldFile(worldPos);
-            Debug.Log("Succesfully loaded field " + worldPos + " with biome: " + masterMap[CoordToId(worldPos, worldSize)].MainBiome);
+            // try to load the requested field from file
+            string file = worldPos.x + "_" + worldPos.y + ".json";
+            if (File.Exists(Application.persistentDataPath + "/Fields/" + file))
+            {
+                LoadFieldFile(worldPos);
+                Debug.Log("Succesfully loaded field " + worldPos + " with biome: " + masterMap[CoordToId(worldPos, worldSize)].MainBiome);
+            }
+            // Otherwise generate the map and save it
+            else
+            {
+                fieldGenerator.MainBiomeGen(masterMap[CoordToId(worldPos, worldSize)]);
+                SaveFieldFile(worldPos);
+
+                Debug.Log("Succesfully generated field " + worldPos + " with biome: " + masterMap[CoordToId(worldPos, worldSize)].MainBiome);
+            }
         }
-        // Otherwise generate the map and save it
         else
         {
-            fieldGenerator.MainBiomeGen(masterMap[CoordToId(worldPos, worldSize)]);
-            SaveFieldFile(worldPos);
-
-            Debug.Log("Succesfully generated field " + worldPos + " with biome: " + masterMap[CoordToId(worldPos, worldSize)].MainBiome);
+            LoadFieldFile(worldPos, prefabMap);
+            Debug.Log("Succesfully loaded map: " + prefabMap);
         }
 
         // Update minimap display
@@ -213,11 +232,20 @@ public class MapManager : MonoBehaviour
         TileDataLoader.tileDataLoader.SaveTileData(worldPos);
     }
 
-    public void LoadFieldFile(Vector2Int pos)
+    public void LoadFieldFile(Vector2Int pos, string prefabMap = null)
     {
-        // Open the json file and convert the contents into a TiledMap object
-        string path = Application.persistentDataPath + "/Fields/" + pos.x + "_" + pos.y + ".json";
-        TiledMap tiled = TiledHelper.OpenJsonMap(path);
+        TiledMap tiled;
+        // Open the json file of a pregenerated field and convert the contents into a TiledMap object
+        if (prefabMap == null)
+        {
+            string path = Application.persistentDataPath + "/Fields/" + pos.x + "_" + pos.y + ".json";
+            tiled = TiledHelper.OpenJsonMap(path);
+        }
+        else
+        {
+            // Load in a specific field map based on the forcePath parameter
+            tiled = TiledHelper.OpenJsonMapPrefab(prefabMap);
+        }
 
         Vector3Int[] positions = new Vector3Int[tiled.height * tiled.width];
         TileBase[] groundArray = new TileBase[tiled.height * tiled.width];

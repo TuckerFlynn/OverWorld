@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class MineBuilder : MonoBehaviour
 {
     DungeonMaster dungeonMaster;
-    InventoryManager invenMngr;
+    InvenManager2 invenMngr;
     ItemsDatabase itemsDB;
     [Header("UI ELEMENTS")]
     public Button UpgradeButton;
@@ -47,7 +47,7 @@ public class MineBuilder : MonoBehaviour
     void Start()
     {
         dungeonMaster = DungeonMaster.dungeonMaster;
-        invenMngr = InventoryManager.inventoryManager;
+        invenMngr = InvenManager2.invenManager2;
         itemsDB = ItemsDatabase.itemsDatabase;
 
         maxBuildLevel = Resources.GetLength(0) * 19;

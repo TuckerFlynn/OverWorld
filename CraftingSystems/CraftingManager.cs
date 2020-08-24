@@ -304,6 +304,7 @@ public class CraftingManager : MonoBehaviour
 
         UpdateRecipeButtons();
         RefreshUI();
+        invenMngr.RefreshMainInvenUI();
     }
 
     // ------- UTILITIES -------

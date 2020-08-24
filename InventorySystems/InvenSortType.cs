@@ -44,11 +44,10 @@ public class InvenSortType : MonoBehaviour
     // Sort the item depending on the current sorting type
     public void SortInven()
     {
+        invenMngr.CompressAllStacks();
+
         if (sortType == 1)
         {
-            // Loop through inventory and combine all partial stacks
-
-
             Array.Sort(invenMngr.Inventory);
         }
         else

@@ -69,6 +69,14 @@ public static class TiledHelper
         TiledMap jsonOut = JsonConvert.DeserializeObject<TiledMap>(jsonIn);
         return jsonOut;
     }
+
+    public static TiledMap OpenJsonMapPrefab(string prefabName)
+    {
+        string jsonIn = Resources.Load<TextAsset>("Tilesets/Prefabs/" + prefabName).text;
+        TiledMap jsonOut = JsonConvert.DeserializeObject<TiledMap>(jsonIn);
+        return jsonOut;
+    }
+
     public static string WriteJsonMap(TiledMap tiled)
     {
         string json = JsonConvert.SerializeObject(tiled, Formatting.Indented);

@@ -306,6 +306,10 @@ public class InvenManager2 : MonoBehaviour
                Quantity = GetInvenByString<InvenItem[]>(dest)[d].Quantity
             };
 
+        // If quantity parameter has not been input, assume player is moving the total amount in the source slot
+        if (quantity == -1)
+            quantity = tempSource[sourceIndex].Quantity;
+
         // Limit quantity to 1 if moving items into equipment slots
         if (dest == "Equipment")
             quantity = 1;
@@ -595,7 +599,7 @@ public class InvenManager2 : MonoBehaviour
 
     public void CompressAllStacks()
     {
-
+        
     }
 
     // ---- UTILITIES ----
